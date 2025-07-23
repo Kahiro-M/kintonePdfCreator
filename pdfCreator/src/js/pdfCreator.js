@@ -17,6 +17,7 @@ const { jsPDF } = window.jspdf;
     }
 
     const config = kintone.plugin.app.getConfig(PLUGIN_ID);
+    const fieldCodes = config.fields ? JSON.parse(config.fields) : [];
 
     const btnSpace = kintone.app.record.getSpaceElement('pdf_export_space');
     if (!btnSpace || document.getElementById('pdf-export-button')) return;
@@ -28,24 +29,28 @@ const { jsPDF } = window.jspdf;
     btnSpace.appendChild(btn);
 
     /**
-     * PDF作成関数（日本語フォント付き）
+     * PDF作成関数（複数フィールド対応）
      */
     function createPDF(record) {
       const doc = new jsPDF();
-
-      // NotoSansJPGothicの登録（lib/NotoSansJPGothic-normal.jsで定義済み）
-      doc.setFont('NotoSansJPGothic');
-
-      const item01 = record[config.fieldCode]?.value || '';
-
+      doc.setFont('NotoSansJPGothic'); // 使用フォント
       doc.setFontSize(16);
-      doc.text('PDF出力サンプル', 10, 20);
+      doc.text('PDF出力プレビュー', 10, 20);
       doc.setFontSize(12);
-      doc.text(`出力項目1: ${item01}`, 10, 40);
+
+      let y = 40;
+      fieldCodes.forEach((code, index) => {
+        const val = record[code]?.value ?? '(未設定)';
+        doc.text(`項目${index + 1}: ${val}`, 10, y);
+        y += 10;
+      });
 
       return doc;
     }
 
+    /**
+     * プレビュー表示関数
+     */
     function previewPDF(doc) {
       const blob = doc.output('blob');
       const url = URL.createObjectURL(blob);

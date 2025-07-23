@@ -1,16 +1,13 @@
 <section class="settings">
   <h2 class="settings-heading">Settings for pdfCreator</h2>
   <form class="js-submit-settings">
+
     <div class="kintoneplugin-row">
-      <label class="kintoneplugin-label">出力項目1:</label>
-      <div class="kintoneplugin-select-outer">
-        <select id="field-select" class="kintoneplugin-select">
-            <option value="">---</option>
-        </select>
-      </div>
+      <label class="kintoneplugin-label">フィールド設定</label>
+      <div id="field-container"></div>
+      <button type="button" id="add-field">＋ 項目を追加</button>
     </div>
 
-    
     <p class="kintoneplugin-row">
         <button type="button" class="js-cancel-button kintoneplugin-button-dialog-cancel">Cancel</button>
         <button class="kintoneplugin-button-dialog-ok">Save</button>

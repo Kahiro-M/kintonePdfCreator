@@ -1,61 +1,100 @@
 jQuery.noConflict();
 
-(function($, PLUGIN_ID) {
+(function ($, PLUGIN_ID) {
   'use strict';
 
-  var $form = $('.js-submit-settings');
-  var $cancelButton = $('.js-cancel-button');
+  const $form = $('.js-submit-settings');
+  const $cancelButton = $('.js-cancel-button');
+  const fieldContainer = document.getElementById('field-container');
+  const addButton = document.getElementById('add-field');
+
   if (!($form.length > 0 && $cancelButton.length > 0)) {
     throw new Error('Required elements do not exist.');
   }
-  var config = kintone.plugin.app.getConfig(PLUGIN_ID);
 
-  function loadFields() {
-    const client = new window.KintoneRestAPIClient();
-    const appId = kintone.app.getId();
-    const fieldSelect = document.getElementById('field-select');
+  const config = kintone.plugin.app.getConfig(PLUGIN_ID);
+  const savedFields = config.fields ? JSON.parse(config.fields) : [];
 
-    // 念のため初期化
-    fieldSelect.innerHTML = '<option value="">-- フィールドを選択 --</option>';
+  let fieldOptionsHTML = '';
 
-    client.app.getFormFields({ app: appId })
-      .then((resp) => {
-        const properties = resp.properties;
+  const client = new window.KintoneRestAPIClient();
+  const appId = kintone.app.getId();
 
-        for (const [code, prop] of Object.entries(properties)) {
-          // 任意でフィールドタイプを制限（例: 文字列1行だけにする場合）
-          if (prop.type === 'SINGLE_LINE_TEXT' || prop.type === 'DATE') {
-            const option = document.createElement('option');
-            option.value = code;
-            option.textContent = `${prop.label}（${code}）`;
-            // ✅ 保存された値と一致すれば selected を付与
-            if (config.fieldCode === code) {
-              option.selected = true;
-            }
-            fieldSelect.appendChild(option);
-          }
+  // フィールド一覧の取得とオプション構築
+  client.app.getFormFields({ app: appId })
+    .then((resp) => {
+      const properties = resp.properties;
+
+      for (const [code, prop] of Object.entries(properties)) {
+        if (prop.type === 'SINGLE_LINE_TEXT' || prop.type === 'DATE') {
+          fieldOptionsHTML += `<option value="${code}">${prop.label}（${code}）</option>`;
         }
-      })
-      .catch((error) => {
-        console.error('フィールド一覧の取得に失敗:', error);
-        alert('フィールド情報の取得に失敗しました。権限やAPIの利用制限を確認してください。');
-      });
+      }
+
+      // 初期描画：保存済み設定 or 空行1つ
+      if (savedFields.length > 0) {
+        savedFields.forEach(code => addFieldRow(code));
+      } else {
+        addFieldRow('');
+      }
+
+    })
+    .catch((error) => {
+      console.error('フィールド取得失敗:', error);
+      alert('フィールド情報の取得に失敗しました。');
+    });
+
+  // 行追加関数
+  function addFieldRow(selectedValue) {
+    const row = document.createElement('div');
+    row.className = 'field-row';
+    row.innerHTML = `
+      <select class="field-select">
+        <option value="">-- フィールドを選択 --</option>
+        ${fieldOptionsHTML}
+      </select>
+      <button type="button" class="remove-field">✕</button>
+    `;
+
+    const select = row.querySelector('.field-select');
+    if (selectedValue) {
+      select.value = selectedValue;
+    }
+
+    row.querySelector('.remove-field').onclick = () => row.remove();
+    fieldContainer.appendChild(row);
   }
-  $form.on('submit', function(e) {
+
+  // 追加ボタン処理
+  addButton.onclick = () => {
+    addFieldRow('');
+  };
+
+  // 保存処理
+  $form.on('submit', function (e) {
     e.preventDefault();
-    const configInfo = {
-      fieldCode: document.getElementById('field-select').value,
+
+    const fieldCodes = Array.from(document.querySelectorAll('.field-select'))
+      .map(select => select.value)
+      .filter(val => val);
+
+    if (fieldCodes.length === 0) {
+      alert('少なくとも1つはフィールドを選択してください');
+      return;
+    }
+
+    const configToSave = {
+      fields: JSON.stringify(fieldCodes)
     };
-    const selectedCode = document.getElementById('field-select').value;
-    kintone.plugin.app.setConfig(configInfo,function(){
-      console.log(configInfo);
+
+    kintone.plugin.app.setConfig(configToSave, function () {
       window.location.href = '../../' + kintone.app.getId() + '/plugin/';
     });
   });
-  $cancelButton.on('click', function() {
+
+  // キャンセル処理
+  $cancelButton.on('click', function () {
     window.location.href = '../../' + kintone.app.getId() + '/plugin/';
   });
 
-  
-  loadFields();
 })(jQuery, kintone.$PLUGIN_ID);
