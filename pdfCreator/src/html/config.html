@@ -1,16 +1,20 @@
 <section class="settings">
   <h2 class="settings-heading">Settings for pdfCreator</h2>
-  <p class="kintoneplugin-desc">This message is displayed on the app page after the app has been updated.</p>
   <form class="js-submit-settings">
-    <p class="kintoneplugin-row">
-      <label for="message">
-        Message:
-        <input type="text" class="js-text-message kintoneplugin-input-text">
-      </label>
-    </p>
+    <div class="kintoneplugin-row">
+      <label class="kintoneplugin-label">出力項目1:</label>
+      <div class="kintoneplugin-select-outer">
+        <select id="field-select" class="kintoneplugin-select">
+            <option value="">---</option>
+        </select>
+      </div>
+    </div>
+
+    
     <p class="kintoneplugin-row">
         <button type="button" class="js-cancel-button kintoneplugin-button-dialog-cancel">Cancel</button>
         <button class="kintoneplugin-button-dialog-ok">Save</button>
     </p>
   </form>
 </section>
+

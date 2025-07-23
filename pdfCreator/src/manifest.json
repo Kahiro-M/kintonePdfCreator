@@ -1,6 +1,6 @@
 {
   "manifest_version": 1,
-  "version": 1,
+  "version": "1.0.1",
   "type": "APP",
   "desktop": {
     "js": [
@@ -19,6 +19,7 @@
     "html": "html/config.html",
     "js": [
       "https://js.cybozu.com/jquery/3.3.1/jquery.min.js",
+      "https://js.cybozu.com/kintone-rest-api-client/5.7.4/KintoneRestAPIClient.min.js",
       "js/config.js"
     ],
     "css": [
@@ -26,7 +27,6 @@
       "css/config.css"
     ],
     "required_params": [
-      "message"
     ]
   },
   "name": {

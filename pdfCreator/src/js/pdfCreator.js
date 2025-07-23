@@ -2,6 +2,7 @@ const { jsPDF } = window.jspdf;
 
 (function () {
   'use strict';
+  const PLUGIN_ID = kintone.$PLUGIN_ID;
 
   kintone.events.on('app.record.detail.show', function (event) {
     const record = event.record;
@@ -10,9 +11,12 @@ const { jsPDF } = window.jspdf;
     if (previewSpace) {
       previewSpace.innerHTML = '';
       previewSpace.style.height = '600px';
+      previewSpace.style.width = '600px';
       previewSpace.style.border = '1px solid #ccc';
       previewSpace.style.marginTop = '10px';
     }
+
+    const config = kintone.plugin.app.getConfig(PLUGIN_ID);
 
     const btnSpace = kintone.app.record.getSpaceElement('pdf_export_space');
     if (!btnSpace || document.getElementById('pdf-export-button')) return;
@@ -32,14 +36,12 @@ const { jsPDF } = window.jspdf;
       // NotoSansJPGothicの登録（lib/NotoSansJPGothic-normal.jsで定義済み）
       doc.setFont('NotoSansJPGothic');
 
-      const name = record['姓']?.value || '';
-      const date = record['日付']?.value || '';
+      const item01 = record[config.fieldCode]?.value || '';
 
       doc.setFontSize(16);
       doc.text('PDF出力サンプル', 10, 20);
       doc.setFontSize(12);
-      doc.text(`姓: ${name}`, 10, 40);
-      doc.text(`日付: ${date}`, 10, 50);
+      doc.text(`出力項目1: ${item01}`, 10, 40);
 
       return doc;
     }
