@@ -5,7 +5,9 @@
   "desktop": {
     "js": [
       "https://js.cybozu.com/jquery/3.3.1/jquery.min.js",
-      "js/desktop.js"
+      "lib/jspdf.umd.min.js",
+      "lib/NotoSansJPGothic-normal.js",
+      "js/pdfCreator.js"
     ],
     "css": [
       "css/51-modern-default.css",
