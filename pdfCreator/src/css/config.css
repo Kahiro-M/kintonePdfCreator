@@ -5,3 +5,15 @@
 .kintoneplugin-input-text {
   width: 20em;
 }
+
+.field-row,
+.field-header {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.field-cell {
+  padding-right: 8px;
+  display: flex;
+  align-items: center;
+}

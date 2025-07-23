@@ -22,34 +22,46 @@ jQuery.noConflict();
     }
 
     if (savedFields.length > 0) {
-      savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label));
+      savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label, obj.showLabel));
     } else {
       addFieldRow('', '');
     }
   });
 
-  function addFieldRow(selectedValue, labelValue) {
+  function addFieldRow(selectedValue, labelValue, showLabel) {
     const row = document.createElement('div');
-    row.className = 'field-row';
+    row.className = 'field-row kintoneplugin-row';
+    row.style.alignItems = 'center';
+
     row.innerHTML = `
-      <select class="field-select">
-        <option value="">-- フィールドを選択 --</option>
-        ${fieldOptionsHTML}
-      </select>
-      <input type="text" class="field-label" placeholder="ラベル名を入力">
-      <button type="button" class="remove-field">✕</button>
+      <div class="field-cell" style="width: 10%;">
+        <input type="checkbox" class="field-show-label">
+      </div>
+      <div class="field-cell" style="width: 35%;">
+        <input type="text" class="field-label" style="width: 90%;" placeholder="ラベル名を入力">
+      </div>
+      <div class="field-cell" style="width: 45%;">
+        <select class="field-select" style="width: 95%;">
+          <option value="">-- フィールドを選択 --</option>
+          ${fieldOptionsHTML}
+        </select>
+      </div>
+      <div class="field-cell" style="width: 10%;">
+        <button type="button" class="remove-field">✕</button>
+      </div>
     `;
 
     const select = row.querySelector('.field-select');
     const label = row.querySelector('.field-label');
+    const checkbox = row.querySelector('.field-show-label');
 
     if (selectedValue) select.value = selectedValue;
     if (labelValue) label.value = labelValue;
+    if (showLabel !== undefined) checkbox.checked = showLabel;
 
     row.querySelector('.remove-field').onclick = () => row.remove();
     fieldContainer.appendChild(row);
   }
-
   addButton.onclick = () => addFieldRow('', '');
 
   $form.on('submit', function (e) {
@@ -59,7 +71,8 @@ jQuery.noConflict();
     const values = rows.map(row => {
       return {
         fieldCode: row.querySelector('.field-select').value,
-        label: row.querySelector('.field-label').value.trim()
+        label: row.querySelector('.field-label').value.trim(),
+        showLabel: row.querySelector('.field-show-label').checked
       };
     }).filter(v => v.fieldCode);
 

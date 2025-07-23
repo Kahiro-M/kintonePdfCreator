@@ -41,7 +41,8 @@ const { jsPDF } = window.jspdf;
       fieldCodes.forEach((field, i) => {
         const val = record[field.fieldCode]?.value ?? '(未設定)';
         const label = field.label || field.fieldCode;
-        doc.text(`${label}: ${val}`, 10, y);
+        const output = field.showLabel ? `${label} ${val}` : `${val}`;
+        doc.text(output, 10, y);
         y += 10;
       });
 
