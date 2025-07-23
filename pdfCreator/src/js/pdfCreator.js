@@ -6,7 +6,6 @@ const { jsPDF } = window.jspdf;
 
   kintone.events.on('app.record.detail.show', function (event) {
     const record = event.record;
-
     const previewSpace = kintone.app.record.getSpaceElement('pdf_preview_space');
     if (previewSpace) {
       previewSpace.innerHTML = '';
@@ -39,9 +38,10 @@ const { jsPDF } = window.jspdf;
       doc.setFontSize(12);
 
       let y = 40;
-      fieldCodes.forEach((code, index) => {
-        const val = record[code]?.value ?? '(未設定)';
-        doc.text(`項目${index + 1}: ${val}`, 10, y);
+      fieldCodes.forEach((field, i) => {
+        const val = record[field.fieldCode]?.value ?? '(未設定)';
+        const label = field.label || field.fieldCode;
+        doc.text(`${label}: ${val}`, 10, y);
         y += 10;
       });
 
