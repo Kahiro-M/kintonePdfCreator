@@ -19,17 +19,33 @@
 }
 
 .shw-chbx {
-  width: 50px;
 }
 
 .lb-txt {
-  width: 35%;
 }
 
 .fld-cd {
-  width: 55%;
 }
 
 .dl-btn {
-  width: 20px;
+}
+
+.field-cell.shw-chbx {
+  width: 200px;
+}
+
+.field-cell.shw-chbx .kuc-checkbox-1-21-0__group {
+    width: auto;
+}
+
+.field-cell.lb-txt {
+  width: 250px;
+}
+
+.field-cell.lb-txt .kuc-text-1-21-0__group {
+    width: 240px;
+}
+
+.field-cell.fld-cd .kuc-dropdown-1-21-0__group {
+    width: 300px;
 }

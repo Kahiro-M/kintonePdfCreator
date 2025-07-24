@@ -2,6 +2,10 @@ jQuery.noConflict();
 (function ($, PLUGIN_ID) {
   'use strict';
 
+  // 自動で最新バージョンを取得
+  const latestVersion = Object.keys(window.Kucs)[0];
+  const Kuc = window.Kucs[latestVersion];
+
   const $form = $('.js-submit-settings');
   const $cancelButton = $('.js-cancel-button');
   const fieldContainer = document.getElementById('field-container');
@@ -10,14 +14,14 @@ jQuery.noConflict();
   const config = kintone.plugin.app.getConfig(PLUGIN_ID);
   const savedFields = config.fields ? JSON.parse(config.fields) : [];
 
-  let fieldOptionsHTML = '';
+  let fieldOptions = [];
   const client = new window.KintoneRestAPIClient();
   const appId = kintone.app.getId();
 
   client.app.getFormFields({ app: appId }).then((resp) => {
     for (const [code, prop] of Object.entries(resp.properties)) {
       if (prop.type === 'SINGLE_LINE_TEXT' || prop.type === 'DATE') {
-        fieldOptionsHTML += `<option value="${code}">${prop.label}（${code}）</option>`;
+        fieldOptions.push({ label: `${prop.label}（${code}）`, value: code });
       }
     }
 
@@ -33,35 +37,59 @@ jQuery.noConflict();
     row.className = 'field-row kintoneplugin-row';
     row.style.alignItems = 'center';
 
-    row.innerHTML = `
-      <div class="field-cell shw-chbx">
-        <input type="checkbox" class="field-show-label">
-      </div>
-      <div class="field-cell lb-txt">
-        <input type="text" class="field-label" style="width: 90%;" placeholder="ラベル名を入力">
-      </div>
-      <div class="field-cell fld-cd">
-        <select class="field-select" style="width: 95%;">
-          <option value="">-- フィールドを選択 --</option>
-          ${fieldOptionsHTML}
-        </select>
-      </div>
-      <div class="field-cell dl-btn">
-        <button type="button" class="remove-field">✕</button>
-      </div>
-    `;
+    const checkbox = new Kuc.Checkbox({
+      items: [{ label: 'ラベル名を表示する', value: 'show' }],
+      value: showLabel ? ['show'] : [],
+      className: 'field-show-label'
+    });
 
-    const select = row.querySelector('.field-select');
-    const label = row.querySelector('.field-label');
-    const checkbox = row.querySelector('.field-show-label');
+    const labelInput = new Kuc.Text({
+      value: labelValue || '',
+      placeholder: 'ラベル名を入力',
+      className: 'field-label'
+    });
 
-    if (selectedValue) select.value = selectedValue;
-    if (labelValue) label.value = labelValue;
-    if (showLabel !== undefined) checkbox.checked = showLabel;
+    const dropdown = new Kuc.Dropdown({
+      items: [{ label: '-- フィールドを選択 --', value: '' }, ...fieldOptions],
+      value: selectedValue || '',
+      className: 'field-select'
+    });
 
-    row.querySelector('.remove-field').onclick = () => row.remove();
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.textContent = '✕';
+    removeBtn.onclick = () => row.remove();
+    removeBtn.className = 'remove-field';
+
+    const checkboxCell = document.createElement('div');
+    checkboxCell.className = 'field-cell shw-chbx';
+    checkboxCell.appendChild(checkbox);
+
+    const labelCell = document.createElement('div');
+    labelCell.className = 'field-cell lb-txt';
+    labelCell.appendChild(labelInput);
+
+    const selectCell = document.createElement('div');
+    selectCell.className = 'field-cell fld-cd';
+    selectCell.appendChild(dropdown);
+
+    const removeCell = document.createElement('div');
+    removeCell.className = 'field-cell dl-btn';
+    removeCell.appendChild(removeBtn);
+
+    row.appendChild(checkboxCell);
+    row.appendChild(labelCell);
+    row.appendChild(selectCell);
+    row.appendChild(removeCell);
+
+    // プロパティとして保持しておく
+    row._fldcd = dropdown;
+    row._lbtxt = labelInput;
+    row._shwchbx = checkbox;
+
     fieldContainer.appendChild(row);
   }
+
   addButton.onclick = () => addFieldRow('', '');
 
   $form.on('submit', function (e) {
@@ -70,9 +98,9 @@ jQuery.noConflict();
     const rows = Array.from(document.querySelectorAll('.field-row'));
     const values = rows.map(row => {
       return {
-        fieldCode: row.querySelector('.field-select').value,
-        label: row.querySelector('.field-label').value.trim(),
-        showLabel: row.querySelector('.field-show-label').checked
+        fieldCode: row._fldcd.value,
+        label: row._lbtxt.value.trim(),
+        showLabel: row._shwchbx.value.includes('show')
       };
     }).filter(v => v.fieldCode);
 

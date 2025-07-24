@@ -4,9 +4,9 @@
   "scripts": {
     "start": "node scripts/npm-start.js",
     "develop": "npm run build -- --watch",
-    "build": "kintone-plugin-packer --ppk private.ppk --out dist/plugin.zip src",
+    "build": "kintone-plugin-packer --ppk private.ppk --out dist/pdfCreator.zip src",
     "lint": "eslint src",
-    "upload": "kintone-plugin-uploader dist/plugin.zip --watch --waiting-dialog-ms 3000"
+    "upload": "kintone-plugin-uploader dist/pdfCreator.zip --watch --waiting-dialog-ms 3000"
   },
   "devDependencies": {
     "@cybozu/eslint-config": "^18.0.3",
