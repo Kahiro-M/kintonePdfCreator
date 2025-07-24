@@ -34,19 +34,19 @@ jQuery.noConflict();
     row.style.alignItems = 'center';
 
     row.innerHTML = `
-      <div class="field-cell" style="width: 10%;">
+      <div class="field-cell shw-chbx">
         <input type="checkbox" class="field-show-label">
       </div>
-      <div class="field-cell" style="width: 35%;">
+      <div class="field-cell lb-txt">
         <input type="text" class="field-label" style="width: 90%;" placeholder="ラベル名を入力">
       </div>
-      <div class="field-cell" style="width: 45%;">
+      <div class="field-cell fld-cd">
         <select class="field-select" style="width: 95%;">
           <option value="">-- フィールドを選択 --</option>
           ${fieldOptionsHTML}
         </select>
       </div>
-      <div class="field-cell" style="width: 10%;">
+      <div class="field-cell dl-btn">
         <button type="button" class="remove-field">✕</button>
       </div>
     `;

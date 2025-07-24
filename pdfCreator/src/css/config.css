@@ -17,3 +17,19 @@
   display: flex;
   align-items: center;
 }
+
+.shw-chbx {
+  width: 50px;
+}
+
+.lb-txt {
+  width: 35%;
+}
+
+.fld-cd {
+  width: 55%;
+}
+
+.dl-btn {
+  width: 20px;
+}
