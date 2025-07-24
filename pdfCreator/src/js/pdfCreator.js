@@ -33,8 +33,12 @@ const { jsPDF } = window.jspdf;
     function createPDF(record) {
       const doc = new jsPDF();
       doc.setFont('NotoSansJPGothic'); // 使用フォント
+
+      // 設定されたタイトルを出力
       doc.setFontSize(16);
-      doc.text('PDF出力プレビュー', 10, 20);
+      const title = config.title || '';
+      doc.text(title, 10, 20);
+
       doc.setFontSize(12);
 
       let y = 40;

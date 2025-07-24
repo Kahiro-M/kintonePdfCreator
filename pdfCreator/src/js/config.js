@@ -6,14 +6,18 @@ jQuery.noConflict();
   const latestVersion = Object.keys(window.Kucs)[0];
   const Kuc = window.Kucs[latestVersion];
 
+  // プラグイン設定の要素を取得
   const $form = $('.js-submit-settings');
   const $cancelButton = $('.js-cancel-button');
   const fieldContainer = document.getElementById('field-container');
   const addButton = document.getElementById('add-field');
 
+  // kintoneのプラグイン設定から初期値を取得
   const config = kintone.plugin.app.getConfig(PLUGIN_ID);
+  document.getElementById('pdf-title').value = config.title || '';
   const savedFields = config.fields ? JSON.parse(config.fields) : [];
 
+  // フィールドコードの選択肢を取得
   let fieldOptions = [];
   const client = new window.KintoneRestAPIClient();
   const appId = kintone.app.getId();
@@ -24,7 +28,7 @@ jQuery.noConflict();
         fieldOptions.push({ label: `${prop.label}（${code}）`, value: code });
       }
     }
-
+    // フィールドコードの選択肢生成
     if (savedFields.length > 0) {
       savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label, obj.showLabel));
     } else {
@@ -32,11 +36,14 @@ jQuery.noConflict();
     }
   });
 
+  // PDF追加項目の行を追加する関数
   function addFieldRow(selectedValue, labelValue, showLabel) {
+    // 行の要素を生成
     const row = document.createElement('div');
     row.className = 'field-row kintoneplugin-row';
     row.style.alignItems = 'center';
 
+    // チェックボックス、ラベル入力、ドロップダウン、削除ボタンを生成
     const checkbox = new Kuc.Checkbox({
       items: [{ label: 'ラベル名を表示する', value: 'show' }],
       value: showLabel ? ['show'] : [],
@@ -61,6 +68,7 @@ jQuery.noConflict();
     removeBtn.onclick = () => row.remove();
     removeBtn.className = 'remove-field';
 
+    // 行に要素を追加
     const checkboxCell = document.createElement('div');
     checkboxCell.className = 'field-cell shw-chbx';
     checkboxCell.appendChild(checkbox);
@@ -90,8 +98,10 @@ jQuery.noConflict();
     fieldContainer.appendChild(row);
   }
 
+  // 追加ボタンのイベントリスナー
   addButton.onclick = () => addFieldRow('', '');
 
+  // フォームの送信イベント
   $form.on('submit', function (e) {
     e.preventDefault();
 
@@ -109,7 +119,11 @@ jQuery.noConflict();
       return;
     }
 
+    // PDFタイトルの取得
+    const title = document.getElementById('pdf-title').value.trim();
+
     kintone.plugin.app.setConfig({
+      title,
       fields: JSON.stringify(values)
     }, () => {
       window.location.href = '../../' + kintone.app.getId() + '/plugin/';
