@@ -11,11 +11,30 @@ jQuery.noConflict();
   const $cancelButton = $('.js-cancel-button');
   const fieldContainer = document.getElementById('field-container');
   const addButton = document.getElementById('add-field');
+  let titleInput = document.getElementById('pdf-title');
+  let titleFontsizeInput = document.getElementById('pdf-title-fontsize');
+  let bodyFontsizeInput = document.getElementById('pdf-body-fontsize');
+  let titleXInput = document.getElementById('pdf-title-fld-x');
+  let titleYInput = document.getElementById('pdf-title-fld-y');
 
   // kintoneのプラグイン設定から初期値を取得
   const config = kintone.plugin.app.getConfig(PLUGIN_ID);
-  document.getElementById('pdf-title').value = config.title || '';
   const savedFields = config.fields ? JSON.parse(config.fields) : [];
+  if (config.title) {
+    titleInput.value = config.title;
+  }
+  if (config.title_fontsize) {
+    titleFontsizeInput.value = config.title_fontsize;
+  }
+  if (config.body_fontsize) {
+    bodyFontsizeInput.value = config.body_fontsize;
+  }
+  if (config.title_x) {
+    titleXInput.value = config.title_x;
+  }
+  if (config.title_y) {
+    titleYInput.value = config.title_y;
+  }
 
   // フィールドコードの選択肢を取得
   let fieldOptions = [];
@@ -30,14 +49,14 @@ jQuery.noConflict();
     }
     // フィールドコードの選択肢生成
     if (savedFields.length > 0) {
-      savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label, obj.showLabel));
+      savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label, obj.showLabel, obj.x, obj.y));
     } else {
-      addFieldRow('', '');
+      addFieldRow('', '', false, '', '');
     }
   });
 
   // PDF追加項目の行を追加する関数
-  function addFieldRow(selectedValue, labelValue, showLabel) {
+  function addFieldRow(selectedValue, labelValue, showLabel, x, y) {
     // 行の要素を生成
     const row = document.createElement('div');
     row.className = 'field-row kintoneplugin-row';
@@ -62,6 +81,18 @@ jQuery.noConflict();
       className: 'field-select'
     });
 
+    const xInput = new Kuc.Text({
+      value: x || '',
+      placeholder: 'X座標',
+      className: 'field-x'
+    });
+
+    const yInput = new Kuc.Text({
+      value: y || '',
+      placeholder: 'Y座標',
+      className: 'field-y'
+    });
+
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.textContent = '✕';
@@ -81,6 +112,14 @@ jQuery.noConflict();
     selectCell.className = 'field-cell fld-cd';
     selectCell.appendChild(dropdown);
 
+    const xCell = document.createElement('div');
+    xCell.className = 'field-cell fld-x';
+    xCell.appendChild(xInput);
+
+    const yCell = document.createElement('div');
+    yCell.className = 'field-cell fld-y';
+    yCell.appendChild(yInput);
+
     const removeCell = document.createElement('div');
     removeCell.className = 'field-cell dl-btn';
     removeCell.appendChild(removeBtn);
@@ -88,18 +127,22 @@ jQuery.noConflict();
     row.appendChild(checkboxCell);
     row.appendChild(labelCell);
     row.appendChild(selectCell);
+    row.appendChild(xCell);
+    row.appendChild(yCell);
     row.appendChild(removeCell);
 
     // プロパティとして保持しておく
     row._fldcd = dropdown;
     row._lbtxt = labelInput;
     row._shwchbx = checkbox;
+    row._x = xInput;
+    row._y = yInput;
 
     fieldContainer.appendChild(row);
   }
 
   // 追加ボタンのイベントリスナー
-  addButton.onclick = () => addFieldRow('', '');
+  addButton.onclick = () => addFieldRow('', '', false, '', '');
 
   // フォームの送信イベント
   $form.on('submit', function (e) {
@@ -110,7 +153,9 @@ jQuery.noConflict();
       return {
         fieldCode: row._fldcd.value,
         label: row._lbtxt.value.trim(),
-        showLabel: row._shwchbx.value.includes('show')
+        showLabel: row._shwchbx.value.includes('show'),
+        x: row._x.value.trim(),
+        y: row._y.value.trim()
       };
     }).filter(v => v.fieldCode);
 
@@ -120,10 +165,18 @@ jQuery.noConflict();
     }
 
     // PDFタイトルの取得
-    const title = document.getElementById('pdf-title').value.trim();
+    const pdf_title = document.getElementById('pdf-title').value.trim();
+    const pdf_title_fontsize = document.getElementById('pdf-title-fontsize').value.trim();
+    const pdf_title_fld_x = document.getElementById('pdf-title-fld-x').value.trim();
+    const pdf_title_fld_y = document.getElementById('pdf-title-fld-y').value.trim();
+    const pdf_body_fontsize = document.getElementById('pdf-body-fontsize').value.trim();
 
     kintone.plugin.app.setConfig({
-      title,
+      title: pdf_title,
+      title_fontsize: pdf_title_fontsize,
+      title_x: pdf_title_fld_x,
+      title_y: pdf_title_fld_y,
+      body_fontsize: pdf_body_fontsize,
       fields: JSON.stringify(values)
     }, () => {
       window.location.href = '../../' + kintone.app.getId() + '/plugin/';

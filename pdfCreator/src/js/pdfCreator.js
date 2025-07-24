@@ -10,7 +10,7 @@ const { jsPDF } = window.jspdf;
     if (previewSpace) {
       previewSpace.innerHTML = '';
       previewSpace.style.height = '600px';
-      previewSpace.style.width = '600px';
+      previewSpace.style.width = '390px';
       previewSpace.style.border = '1px solid #ccc';
       previewSpace.style.marginTop = '10px';
     }
@@ -35,19 +35,61 @@ const { jsPDF } = window.jspdf;
       doc.setFont('NotoSansJPGothic'); // 使用フォント
 
       // 設定されたタイトルを出力
-      doc.setFontSize(16);
       const title = config.title || '';
-      doc.text(title, 10, 20);
+      // デフォルトのタイトルフォントサイズ
+      const defaultTitleFontsize = 16;
+      // 数値でなければデフォルトタイトルフォントサイズで印字
+      const titleFontsize = parseFloat(config.title_fontsize);
+      if (!isNaN(titleFontsize)) {
+        doc.setFontSize(titleFontsize);
+      } else {
+        doc.setFontSize(defaultTitleFontsize);
+      }
 
-      doc.setFontSize(12);
+      // デフォルトの初期座標
+      const defaultTitleX = 10;
+      const defaultTitleY = 20;
 
-      let y = 40;
+
+      // 数値でなければデフォルト位置で印字
+      const titleX = parseFloat(config.title_x);
+      const titleY = parseFloat(config.title_y);
+      if (!isNaN(titleX) && !isNaN(titleY)) {
+        doc.text(title, titleX, titleY);
+      } else {
+        doc.text(title, defaultTitleX, defaultTitleY);
+      }
+
+      // デフォルトの本文フォントサイズ
+      const defaultBodyFontsize = 12;
+      // 数値でなければデフォルト本文フォントサイズで印字
+      const bodyFontsize = parseFloat(config.body_fontsize);
+      if (!isNaN(bodyFontsize)) {
+        doc.setFontSize(bodyFontsize);
+      } else {
+        doc.setFontSize(defaultBodyFontsize);
+      }
+
+
+      // デフォルトの初期座標
+      const defaultX = 10;
+      let defaultY = 40;
+
       fieldCodes.forEach((field, i) => {
         const val = record[field.fieldCode]?.value ?? '(未設定)';
         const label = field.label || field.fieldCode;
         const output = field.showLabel ? `${label} ${val}` : `${val}`;
-        doc.text(output, 10, y);
-        y += 10;
+
+        // 数値でなければデフォルト位置で印字
+        const x = parseFloat(field.x);
+        const y = parseFloat(field.y);
+        
+        if (!isNaN(x) && !isNaN(y)) {
+          doc.text(output, x, y);
+        } else {
+          doc.text(output, defaultX, defaultY);
+          defaultY += 10;
+        }
       });
 
       return doc;

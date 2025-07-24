@@ -38,14 +38,12 @@
     width: auto;
 }
 
-.field-cell.lb-txt {
-  width: 250px;
-}
-
+.field-cell.lb-txt ,
 .field-cell.lb-txt .kuc-text-1-21-0__group {
-    width: 240px;
+    width: 250px;
 }
 
+.field-cell.fld-cd,
 .field-cell.fld-cd .kuc-dropdown-1-21-0__group {
     width: 300px;
 }
@@ -53,4 +51,28 @@
 .kintoneplugin-input-text {
     color: unset;
 
+}
+
+.field-cell.fld-x,
+.field-cell.fld-y,
+input.pdf-title-fontsize,
+input.pdf-body-fontsize,
+input.pdf-title-fld-x,
+input.pdf-title-fld-y,
+.field-cell.fld-x .kuc-text-1-21-0__group,
+.field-cell.fld-y .kuc-text-1-21-0__group{
+  width: 65px;
+}
+.pdf-title-fontsize,
+.pdf-body-fontsize,
+.pdf-title-fld-x-label,
+.pdf-title-fld-y-label{
+  margin-left: 0px;
+  margin-right: 10px;
+}
+input.pdf-title-fontsize,
+input.pdf-body-fontsize,
+input.pdf-title-fld-x,
+input.pdf-title-fld-y{
+  margin-right: 30px;
 }
