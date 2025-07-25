@@ -48,20 +48,104 @@ const { jsPDF } = window.jspdf;
       return 'PNG';
     }
 
+    // 画像の読み込みをPromiseでラップする関数
+    function loadImage(base64) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('画像の読み込みに失敗しました'));
+        img.src = base64;
+      });
+    }
+
     /**
      * PDF作成関数（複数フィールド対応）
      */
-    function createPDF(record) {
+    async function createPDF(record) {
       const doc = new jsPDF();
 
       // 背景画像の設定
       const bgImg = config.bg_img;
       if (bgImg) {
-        const pageW = doc.internal.pageSize.getWidth();
+        const img = await loadImage(config.bg_img);
+        const imgW = img.width;
+        const imgH = img.height;
+
+        // mm単位のページサイズ
+        const pageW = doc.internal.pageSize.getWidth();  // 単位: mm
         const pageH = doc.internal.pageSize.getHeight();
+
+        // 解像度：imgのピクセル → mm 変換スケール
+        const pxToMm = (px) => px * 25.4 / 96; // assume 96dpi
+
+        const imgWmm = pxToMm(imgW);
+        const imgHmm = pxToMm(imgH);
+
+        let drawW = imgWmm;
+        let drawH = imgHmm;
+
+        // 拡大縮小モード
+        switch (config.bg_img_size) {
+          case 'contain': {
+            const scaleW = pageW / imgWmm;
+            const scaleH = pageH / imgHmm;
+            drawW = imgWmm * scaleW;
+            drawH = imgHmm * scaleH;
+            break;
+          }
+          case 'wfit': {
+            const scale = pageW / imgWmm;
+            drawW = pageW;
+            drawH = imgHmm * scale;
+            break;
+          }
+          case 'hfit': {
+            const scale = pageH / imgHmm;
+            drawH = pageH;
+            drawW = imgWmm * scale;
+            break;
+          }
+          case 'actual':
+          default:
+            drawW = imgWmm;
+            drawH = imgHmm;
+            break;
+        }
+
+        // 表示位置
+        let x = 0;
+        let y = 0;
+
+        switch (config.bg_img_align_x) {
+          case 'center':
+            x = (pageW - drawW) / 2;
+            break;
+          case 'right':
+            x = pageW - drawW;
+            break;
+          case 'left':
+          default:
+            x = 0;
+            break;
+        }
+
+        switch (config.bg_img_align_y) {
+          case 'middle':
+            y = (pageH - drawH) / 2;
+            break;
+          case 'bottom':
+            y = pageH - drawH;
+            break;
+          case 'top':
+          default:
+            y = 0;
+            break;
+        }
+
+        // 画像形式判定
         const imgFormat = getImageFormatFromDataURL(bgImg);
-        if(imgFormat){
-          doc.addImage(bgImg, imgFormat, 0, 0, pageW, pageH);
+        if (imgFormat) {
+          doc.addImage(bgImg, imgFormat, x, y, drawW, drawH);
         }
       }
 
@@ -145,13 +229,15 @@ const { jsPDF } = window.jspdf;
       }
     }
 
-    // 初期プレビュー
-    const previewDoc = createPDF(record);
-    previewPDF(previewDoc);
+    // 初期プレビュー（背景画像の拡大縮小処理のために、非同期処理）
+    (async () => {
+      const previewDoc = await createPDF(record);
+      previewPDF(previewDoc);
+    })();
 
     // 出力ボタン
-    btn.onclick = function () {
-      const downloadDoc = createPDF(record);
+    btn.onclick = async function () {
+      const downloadDoc = await createPDF(record);
       downloadDoc.save('kintone_record.pdf');
     };
 

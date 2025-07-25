@@ -76,3 +76,34 @@ input.pdf-title-fld-x,
 input.pdf-title-fld-y{
   margin-right: 30px;
 }
+
+
+input.pdf-bg-img {
+  border: unset;
+  box-shadow: unset;
+}
+
+
+div.flex-contener {
+  display: inline-flex;
+}
+
+.pdf-bg-img-setting-contener {
+  margin-left: 10px;
+  margin-right: 50px;
+  margin-top: 10px;
+}
+
+div#pdf-bg-img-preview-container {
+  margin-left: 50px;
+}
+
+
+img#pdf-bg-img-preview{
+  max-height: 300px;
+}
+
+
+hr.pdfCreator-hr {
+  border: 1px solid rgb(227, 231, 232);
+}

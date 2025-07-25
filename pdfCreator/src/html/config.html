@@ -1,17 +1,19 @@
 <section class="settings">
-  <h2 class="settings-heading">PDF出力項目</h2>
   <form class="js-submit-settings">
 
     <div class="kintoneplugin-row">
-      <label for="pdf-title" class="kintoneplugin-label">PDFタイトル</label>
+      <label for="pdf-title" class="kintoneplugin-label">タイトル</label>
+    </div>
+    <div class="kintoneplugin-row">
+      <label for="pdf-title" class="">PDFタイトル</label>
       <input type="text" id="pdf-title" class="kintoneplugin-input-text" placeholder="例：見積書">
     </div>
     <div class="kintoneplugin-row">
-      <label for="pdf-title-fontsize" class="kintoneplugin-label pdf-title-fontsize">タイトルサイズ</label>
+      <label for="pdf-title-fontsize" class=" pdf-title-fontsize">タイトルサイズ</label>
       <input type="text" id="pdf-title-fontsize" class="kintoneplugin-input-text pdf-title-fontsize" placeholder="サイズ(pt)">
-      <label for="pdf-title-fld-x" class="kintoneplugin-label pdf-title-fld-x-label">x座標(mm)</label>
+      <label for="pdf-title-fld-x" class=" pdf-title-fld-x-label">x座標(mm)</label>
       <input type="text" id="pdf-title-fld-x" class="kintoneplugin-input-text pdf-title-fld-x" placeholder="x座標(mm)">
-      <label for="pdf-title-fld-y" class="kintoneplugin-label pdf-title-fld-y-label">y座標(mm)</label>
+      <label for="pdf-title-fld-y" class=" pdf-title-fld-y-label">y座標(mm)</label>
       <input type="text" id="pdf-title-fld-y" class="kintoneplugin-input-text pdf-title-fld-y" placeholder="y座標(mm)">
     </div>
     <div class="kintoneplugin-row">
@@ -19,7 +21,12 @@
       <input type="text" id="pdf-body-fontsize" class="kintoneplugin-input-text pdf-body-fontsize" placeholder="サイズ(pt)">
     </div>
 
+    <hr class="pdfCreator-hr">
+
     <!-- ヘッダー -->
+    <div class="kintoneplugin-row">
+      <label for="pdf-title" class="kintoneplugin-label">PDF出力項目</label>
+    </div>
     <div class="field-header kintoneplugin-row">
       <div class="field-cell shw-chbx">表示</div>
       <div class="field-cell lb-txt">ラベル名</div>
@@ -34,12 +41,53 @@
       <button type="button" id="add-field">＋ 項目を追加</button>
     </div>
 
+    <hr class="pdfCreator-hr">
+
     <div class="kintoneplugin-row">
-      <label for="pdf-bg-img" class="kintoneplugin-label pdf-bg-img">背景画像</label>
-      <input type="file" id="pdf-bg-img" class="kintoneplugin-input-text pdf-bg-img" accept="image/*" />
-      <div id="pdf-bg-img-preview-container">
-        <label for="pdf-bg-img-preview" class="kintoneplugin-label pdf-bg-img-preview">現在の背景画像</label>
-        <img id="pdf-bg-img-preview" src="" alt="プレビュー" style="max-width: 200px; margin-top: 8px;" />
+      <div class="kintoneplugin-row">
+        <label for="pdf-title" class="kintoneplugin-label">背景画像</label>
+      </div>
+
+      <div id="pdf-bg-img-attachment-container">
+        <label for="pdf-bg-img" class="kintoneplugin-label pdf-bg-img">画像データ</label>
+        <input type="file" id="pdf-bg-img" class="kintoneplugin-input-text pdf-bg-img" accept="image/*" />
+      </div>
+
+      <div class="flex-contener">
+        <div class="pdf-bg-img-setting-container">
+          <label for="pdf-bg-img" class="kintoneplugin-label pdf-bg-img">画像設定</label>
+          <div class="kintoneplugin-row">
+            <label>サイズモード</label>
+            <select id="pdf-bg-img-size-mode" class="kintoneplugin-dropdown">
+              <option value="contain">用紙サイズに合わせる</option>
+              <option value="wfit">横幅に合わせる</option>
+              <option value="hfit">縦幅に合わせる</option>
+              <option value="actual">原寸サイズ</option>
+            </select>
+          </div>
+
+          <div class="kintoneplugin-row">
+            <label>表示位置（X方向）</label>
+            <select id="pdf-bg-img-align-x" class="kintoneplugin-dropdown">
+              <option value="left">左</option>
+              <option value="center">中央</option>
+              <option value="right">右</option>
+            </select>
+          </div>
+
+          <div class="kintoneplugin-row">
+            <label>表示位置（Y方向）</label>
+            <select id="pdf-bg-img-align-y" class="kintoneplugin-dropdown">
+              <option value="top">上</option>
+              <option value="middle">中央</option>
+              <option value="bottom">下</option>
+            </select>
+          </div>
+        </div>
+        <div id="pdf-bg-img-preview-container">
+          <label for="pdf-bg-img-preview" class="kintoneplugin-label pdf-bg-img-preview">現在の背景画像</label><br>
+          <img id="pdf-bg-img-preview" src="" alt="プレビュー" />
+        </div>
       </div>
     </div>
 

@@ -17,7 +17,10 @@ jQuery.noConflict();
   let titleXInput = document.getElementById('pdf-title-fld-x');
   let titleYInput = document.getElementById('pdf-title-fld-y');
   let bgImgInput = '';
-  let bgImgPreview = document.getElementById('pdf-bg-img-preview');;
+  let bgImgPreview = document.getElementById('pdf-bg-img-preview');
+  let bgSizeMode = document.getElementById('pdf-bg-img-size-mode');
+  let bgImgAlignX = document.getElementById('pdf-bg-img-align-x');
+  let bgImgAlignY = document.getElementById('pdf-bg-img-align-y');
 
   // kintoneのプラグイン設定から初期値を取得
   const config = kintone.plugin.app.getConfig(PLUGIN_ID);
@@ -40,6 +43,15 @@ jQuery.noConflict();
   if (config.bg_img) {
     bgImgInput = config.bg_img;
     bgImgPreview.src = config.bg_img;
+  }
+  if (config.bg_img_size) {
+    bgSizeMode.value = config.bg_img_size;
+  }
+  if (config.bg_img_size) {
+    bgImgAlignX.value = config.bg_img_align_x;
+  }
+  if (config.bg_img_size) {
+    bgImgAlignY.value = config.bg_img_align_y;
   }
 
   // フィールドコードの選択肢を取得
@@ -248,6 +260,9 @@ jQuery.noConflict();
     const pdf_title_fld_y = document.getElementById('pdf-title-fld-y').value.trim();
     const pdf_body_fontsize = document.getElementById('pdf-body-fontsize').value.trim();
     const pdf_bg_img = bgImgInput;
+    const pdf_bg_img_size = document.getElementById('pdf-bg-img-size-mode').value.trim();
+    const pdf_bg_img_align_x = document.getElementById('pdf-bg-img-align-x').value.trim();
+    const pdf_bg_img_align_y = document.getElementById('pdf-bg-img-align-y').value.trim();
 
     kintone.plugin.app.setConfig({
       title: pdf_title,
@@ -256,6 +271,9 @@ jQuery.noConflict();
       title_y: pdf_title_fld_y,
       body_fontsize: pdf_body_fontsize,
       bg_img: pdf_bg_img,
+      bg_img_size: pdf_bg_img_size,
+      bg_img_align_x: pdf_bg_img_align_x,
+      bg_img_align_y: pdf_bg_img_align_y,
       fields: JSON.stringify(values)
     }, () => {
       window.location.href = '../../' + kintone.app.getId() + '/plugin/';
