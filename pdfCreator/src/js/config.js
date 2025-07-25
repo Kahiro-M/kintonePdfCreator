@@ -16,6 +16,7 @@ jQuery.noConflict();
   let bodyFontsizeInput = document.getElementById('pdf-body-fontsize');
   let titleXInput = document.getElementById('pdf-title-fld-x');
   let titleYInput = document.getElementById('pdf-title-fld-y');
+  let bgImgInput = '';
 
   // kintoneのプラグイン設定から初期値を取得
   const config = kintone.plugin.app.getConfig(PLUGIN_ID);
@@ -34,6 +35,9 @@ jQuery.noConflict();
   }
   if (config.title_y) {
     titleYInput.value = config.title_y;
+  }
+  if (config.bg_img) {
+    bgImgInput = config.bg_img;
   }
 
   // フィールドコードの選択肢を取得
@@ -141,6 +145,76 @@ jQuery.noConflict();
     fieldContainer.appendChild(row);
   }
 
+  // 画像の自動圧縮関数
+  function convertAndCompressImage(file, maxWidth = 595, maxBase64Length = 65000, callback) {
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      const img = new Image();
+
+      img.onload = function () {
+        // スケーリング計算（A4横幅＝595ptに合わせる）
+        const scale = maxWidth / img.width;
+        const width = maxWidth;
+        const height = img.height * scale;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+
+        // PNGやWEBPでもdrawImageで描画 → JPEGでエクスポート
+        ctx.drawImage(img, 0, 0, width, height);
+
+        let quality = 0.9;
+        let base64 = '';
+
+        while (quality >= 0.3) {
+          base64 = canvas.toDataURL('image/jpeg', quality);
+          if (base64.length <= maxBase64Length) break;
+          quality -= 0.05;
+        }
+
+        if (base64.length > maxBase64Length) {
+          alert('画像を自動圧縮しましたが、容量制限を超えています。さらに小さい画像を選んでください。');
+          callback(null);
+        } else {
+          callback(base64);
+        }
+      };
+
+      img.onerror = () => {
+        alert('画像の読み込みに失敗しました');
+        callback(null);
+      };
+
+      img.src = e.target.result;
+    };
+
+    reader.onerror = () => {
+      alert('ファイルの読み込みに失敗しました');
+      callback(null);
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+
+  // 背景画像のファイル選択イベント
+  document.getElementById('pdf-bg-img').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    // ファイルが選択されていない場合は何もしない
+    if(!file){
+      return;
+    }
+
+    convertAndCompressImage(file, 595, 65000, (base64) => {
+      if (base64) {
+        bgImgInput = base64;
+      }
+    });
+  });
+
   // 追加ボタンのイベントリスナー
   addButton.onclick = () => addFieldRow('', '', false, '', '');
 
@@ -170,6 +244,7 @@ jQuery.noConflict();
     const pdf_title_fld_x = document.getElementById('pdf-title-fld-x').value.trim();
     const pdf_title_fld_y = document.getElementById('pdf-title-fld-y').value.trim();
     const pdf_body_fontsize = document.getElementById('pdf-body-fontsize').value.trim();
+    const pdf_bg_img = bgImgInput;
 
     kintone.plugin.app.setConfig({
       title: pdf_title,
@@ -177,6 +252,7 @@ jQuery.noConflict();
       title_x: pdf_title_fld_x,
       title_y: pdf_title_fld_y,
       body_fontsize: pdf_body_fontsize,
+      bg_img: pdf_bg_img,
       fields: JSON.stringify(values)
     }, () => {
       window.location.href = '../../' + kintone.app.getId() + '/plugin/';

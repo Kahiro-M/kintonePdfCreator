@@ -27,12 +27,46 @@ const { jsPDF } = window.jspdf;
     btn.className = 'kintoneplugin-button-normal';
     btnSpace.appendChild(btn);
 
+    // 画像形式を取得する関数
+    function getImageFormatFromDataURL(dataURL) {
+      if(typeof dataURL !== 'string'){
+        return null;
+      }
+      if(dataURL.startsWith('data:image/png')){
+        return 'PNG';
+      }
+      if(dataURL.startsWith('data:image/jpeg')){
+        return 'JPEG';
+      }
+      if(dataURL.startsWith('data:image/jpg')){
+        return 'JPEG';
+      }
+      if(dataURL.startsWith('data:image/webp')){
+        return 'WEBP'; // jsPDF対応は環境による
+      }
+      // 対応してない/不明な形式はPNGをデフォルトに
+      return 'PNG';
+    }
+
     /**
      * PDF作成関数（複数フィールド対応）
      */
     function createPDF(record) {
       const doc = new jsPDF();
-      doc.setFont('NotoSansJPGothic'); // 使用フォント
+
+      // 背景画像の設定
+      const bgImg = config.bg_img;
+      if (bgImg) {
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+        const imgFormat = getImageFormatFromDataURL(bgImg);
+        if(imgFormat){
+          doc.addImage(bgImg, imgFormat, 0, 0, pageW, pageH);
+        }
+      }
+
+      // フォントの設定
+      doc.setFont('NotoSansJPGothic');
 
       // 設定されたタイトルを出力
       const title = config.title || '';
@@ -69,7 +103,6 @@ const { jsPDF } = window.jspdf;
       } else {
         doc.setFontSize(defaultBodyFontsize);
       }
-
 
       // デフォルトの初期座標
       const defaultX = 10;
