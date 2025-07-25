@@ -17,6 +17,7 @@ jQuery.noConflict();
   let titleXInput = document.getElementById('pdf-title-fld-x');
   let titleYInput = document.getElementById('pdf-title-fld-y');
   let bgImgInput = '';
+  let bgImgPreview = document.getElementById('pdf-bg-img-preview');;
 
   // kintoneのプラグイン設定から初期値を取得
   const config = kintone.plugin.app.getConfig(PLUGIN_ID);
@@ -38,6 +39,7 @@ jQuery.noConflict();
   }
   if (config.bg_img) {
     bgImgInput = config.bg_img;
+    bgImgPreview.src = config.bg_img;
   }
 
   // フィールドコードの選択肢を取得
@@ -146,7 +148,7 @@ jQuery.noConflict();
   }
 
   // 画像の自動圧縮関数
-  function convertAndCompressImage(file, maxWidth = 595, maxBase64Length = 65000, callback) {
+  function convertAndCompressImage(file, maxWidth = 595, maxBase64Length = 60000, callback) {
     const reader = new FileReader();
 
     reader.onload = function (e) {
@@ -208,9 +210,10 @@ jQuery.noConflict();
       return;
     }
 
-    convertAndCompressImage(file, 595, 65000, (base64) => {
+    convertAndCompressImage(file, 595, 60000, (base64) => {
       if (base64) {
         bgImgInput = base64;
+        bgImgPreview.src = base64;
       }
     });
   });
