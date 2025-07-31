@@ -106,8 +106,8 @@ img#pdf-bg-img-preview{
 
 hr.pdfCreator-hr {
   border: 1px solid rgb(227, 231, 232);
+  margin: 30px 0px;
 }
-
 
 img:before {
   content: none;
@@ -117,6 +117,6 @@ img.broken {
 }
 
 section.license-content {
-    font-size: 10px !important;
-    margin: 15px 0px 30px 30px;
+  font-size: 10px !important;
+  margin: 15px 0px 30px 30px;
 }
