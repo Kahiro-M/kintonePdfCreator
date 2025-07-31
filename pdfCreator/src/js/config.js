@@ -17,6 +17,8 @@ jQuery.noConflict();
   let bodyFontsizeInput = document.getElementById('pdf-body-fontsize');
   let titleXInput = document.getElementById('pdf-title-fld-x');
   let titleYInput = document.getElementById('pdf-title-fld-y');
+  let title_font = document.getElementById('pdf-title-font');
+  let body_font = document.getElementById('pdf-body-font');
   let bgImgInput = '';
   let bgImgPreview = document.getElementById('pdf-bg-img-preview');
   let bgSizeMode = document.getElementById('pdf-bg-img-size-mode');
@@ -40,6 +42,12 @@ jQuery.noConflict();
   }
   if (config.title_y) {
     titleYInput.value = config.title_y;
+  }
+  if (config.title_font) {
+    title_font.value = config.title_font;
+  }
+  if (config.body_font) {
+    body_font.value = config.body_font;
   }
   if (config.bg_img) {
     bgImgInput = config.bg_img;
@@ -281,7 +289,9 @@ jQuery.noConflict();
     const pdf_title_fontsize = document.getElementById('pdf-title-fontsize').value.trim();
     const pdf_title_fld_x = document.getElementById('pdf-title-fld-x').value.trim();
     const pdf_title_fld_y = document.getElementById('pdf-title-fld-y').value.trim();
+    const pdf_title_font = document.getElementById('pdf-title-font').value.trim();
     const pdf_body_fontsize = document.getElementById('pdf-body-fontsize').value.trim();
+    const pdf_body_font = document.getElementById('pdf-body-font').value.trim();
     const pdf_bg_img = bgImgInput;
     const pdf_bg_img_size = document.getElementById('pdf-bg-img-size-mode').value.trim();
     const pdf_bg_img_align_x = document.getElementById('pdf-bg-img-align-x').value.trim();
@@ -292,7 +302,9 @@ jQuery.noConflict();
       title_fontsize: pdf_title_fontsize,
       title_x: pdf_title_fld_x,
       title_y: pdf_title_fld_y,
+      title_font: pdf_title_font,
       body_fontsize: pdf_body_fontsize,
+      body_font: pdf_body_font,
       bg_img: pdf_bg_img,
       bg_img_size: pdf_bg_img_size,
       bg_img_align_x: pdf_bg_img_align_x,

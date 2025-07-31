@@ -17,8 +17,26 @@
       <input type="text" id="pdf-title-fld-y" class="kintoneplugin-input-text pdf-title-fld-y" placeholder="y座標(mm)">
     </div>
     <div class="kintoneplugin-row">
+      <label>タイトルのフォント</label>
+      <select id="pdf-title-font" class="kintoneplugin-dropdown">
+        <option value="NotoSansJPGothic">Noto SansJ JP(ゴシック体)</option>
+        <option value="NotoSerifJPMincho">Noto Serif JP(明朝体)</option>
+        <option value="ipaexg">IPAexゴシック</option>
+        <option value="ipaexm">IPAex明朝</option>
+      </select>
+
+    </div>
+    <hr class="pdfCreator-hr">
+    <div class="kintoneplugin-row">
       <label for="pdf-body-fontsize" class="kintoneplugin-label pdf-body-fontsize">本文サイズ</label>
       <input type="text" id="pdf-body-fontsize" class="kintoneplugin-input-text pdf-body-fontsize" placeholder="サイズ(pt)">
+      <label>本文のフォント</label>
+      <select id="pdf-body-font" class="kintoneplugin-dropdown">
+        <option value="NotoSansJPGothic">Noto SansJ JP(ゴシック体)</option>
+        <option value="NotoSerifJPMincho">Noto Serif JP(明朝体)</option>
+        <option value="ipaexg">IPAexゴシック</option>
+        <option value="ipaexm">IPAex明朝</option>
+      </select>
     </div>
 
     <hr class="pdfCreator-hr">
@@ -102,3 +120,27 @@
   </form>
 </section>
 
+    <hr class="pdfCreator-hr">
+
+
+<section class="license">
+  <p>フォントに関わるライセンス情報<p>
+  <p>「PDF生成器」では、以下のフォントを利用しております。<p>
+
+  <section class="license-content">
+    <p>■フォント名：IPAexゴシック、IPAex明朝</p>
+    <p>このフォントに関わるライセンスは「IPAフォントライセンスv1.0」に従います。本フォントはIPAフォントライセンスv1.0が定める「派生プログラム」に該当するため、同ライセンスが本フォントにもそのまま適用されます。 本フォントはIPAフォントライセンスv1.0の下で再配布することができます。 配布形式を変更する場合、同ライセンス第3条1項に従う必要があります。</p>
+    <p>■フォントの配布先</p>
+    <p><a href="https://moji.or.jp/ipafont/ipafontdownload/">https://moji.or.jp/ipafont/ipafontdownload/</a></p>
+  </section>
+
+
+  <section class="license-content">
+    <p>■フォント名：Noto Sans JP、Noto Serif JP</p>
+    <p>このフォントに関わるライセンスは「SIL OPEN FONT LICENSE Version 1.1」に従います。</p>
+    <p>■フォントの配布先</p>
+    <p>Noto Sans JP：<a href="https://fonts.google.com/noto/specimen/Noto+Sans+JP/">https://fonts.google.com/noto/specimen/Noto+Sans+JP/</a></p>
+    <p>Noto Serif JP：<a href="https://fonts.google.com/noto/specimen/Noto+Serif+JP/">https://fonts.google.com/noto/specimen/Noto+Serif+JP/</a></p>
+  </section>
+
+</section>

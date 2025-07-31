@@ -149,8 +149,8 @@ const { jsPDF } = window.jspdf;
         }
       }
 
-      // フォントの設定
-      doc.setFont('NotoSansJPGothic');
+      // タイトルフォントの設定
+      doc.setFont(config.title_font);
 
       // 設定されたタイトルを出力
       const title = config.title || '';
@@ -177,6 +177,9 @@ const { jsPDF } = window.jspdf;
       } else {
         doc.text(title, defaultTitleX, defaultTitleY);
       }
+
+      // 本文タイトルフォントの設定
+      doc.setFont(config.body_font);
 
       // デフォルトの本文フォントサイズ
       const defaultBodyFontsize = 12;

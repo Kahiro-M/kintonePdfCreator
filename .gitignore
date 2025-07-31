@@ -139,7 +139,8 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 # 再頒布NGフォントファイル
-pdfCreator/src/lib/ipaexg-normal.js
-pdfCreator/src/lib/ipaexm-normal.js
+# pdfCreator/src/lib/ipaexg-normal.js
+# pdfCreator/src/lib/ipaexm-normal.js
+
 kintone-connect-info.txt
 pdfCreator/npmstart.sh

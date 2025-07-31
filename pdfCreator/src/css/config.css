@@ -116,3 +116,7 @@ img.broken {
   display: none;
 }
 
+section.license-content {
+    font-size: 10px !important;
+    margin: 15px 0px 30px 30px;
+}
