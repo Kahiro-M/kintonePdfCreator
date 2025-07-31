@@ -6,6 +6,9 @@ const { jsPDF } = window.jspdf;
 
   kintone.events.on('app.record.detail.show', function (event) {
     const record = event.record;
+    const recordId = kintone.app.record.getId();
+    const appId = kintone.app.getId();
+    const timestamp = getCurrentTimestamp();
     const previewSpace = kintone.app.record.getSpaceElement('pdf_preview_space');
     if (previewSpace) {
       previewSpace.innerHTML = '';
@@ -18,14 +21,16 @@ const { jsPDF } = window.jspdf;
     const config = kintone.plugin.app.getConfig(PLUGIN_ID);
     const fieldCodes = config.fields ? JSON.parse(config.fields) : [];
 
-    const btnSpace = kintone.app.record.getSpaceElement('pdf_export_space');
-    if (!btnSpace || document.getElementById('pdf-export-button')) return;
-
-    const btn = document.createElement('button');
-    btn.id = 'pdf-export-button';
-    btn.innerText = 'PDF出力';
-    btn.className = 'kintoneplugin-button-normal';
-    btnSpace.appendChild(btn);
+    // PDF出力ボタンの作成
+    if(document.getElementById('pdf-export-button')===null){
+      const exportBtn = document.createElement('button');
+      exportBtn.id = 'pdf-export-button';
+      exportBtn.textContent = 'PDF出力📃';
+      exportBtn.className = 'kintoneplugin-button-normal'; // kintone風の見た目に
+      exportBtn.style.marginLeft = '8px';
+      kintone.app.record.getHeaderMenuSpaceElement().appendChild(exportBtn);
+    }
+    const btn = document.getElementById('pdf-export-button');
 
     // 画像形式を取得する関数
     function getImageFormatFromDataURL(dataURL) {
@@ -234,16 +239,36 @@ const { jsPDF } = window.jspdf;
 
     // 初期プレビュー（背景画像の拡大縮小処理のために、非同期処理）
     (async () => {
-      const previewDoc = await createPDF(record);
-      previewPDF(previewDoc);
+      if(!previewSpace){
+        return;
+      }else{
+        const previewDoc = await createPDF(record);
+        previewPDF(previewDoc);
+      }
     })();
 
     // 出力ボタン
     btn.onclick = async function () {
       const downloadDoc = await createPDF(record);
-      downloadDoc.save('kintone_record.pdf');
+      downloadDoc.save('app'+appId+'_record'+recordId+'_'+timestamp+'.pdf');
     };
 
     return event;
   });
+  function getCurrentTimestamp() {
+    const now = new Date();
+
+    // ゼロ埋め関数
+    const pad = (n) => n.toString().padStart(2, '0');
+
+    const year = now.getFullYear();
+    const month = pad(now.getMonth() + 1);      // 月は0始まりなので+1
+    const day = pad(now.getDate());
+    const hour = pad(now.getHours());
+    const minute = pad(now.getMinutes());
+    const second = pad(now.getSeconds());
+
+    return `${year}${month}${day}_${hour}${minute}${second}`;
+  }
+
 })();
