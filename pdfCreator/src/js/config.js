@@ -11,6 +11,7 @@ jQuery.noConflict();
   const $cancelButton = $('.js-cancel-button');
   const fieldContainer = document.getElementById('field-container');
   const addButton = document.getElementById('add-field');
+  const pdfImgClearButton = document.getElementById('pdf-bg-img-clear');
   let titleInput = document.getElementById('pdf-title');
   let titleFontsizeInput = document.getElementById('pdf-title-fontsize');
   let bodyFontsizeInput = document.getElementById('pdf-body-fontsize');
@@ -43,6 +44,9 @@ jQuery.noConflict();
   if (config.bg_img) {
     bgImgInput = config.bg_img;
     bgImgPreview.src = config.bg_img;
+  }else{
+    bgImgPreview.classList.add('broken')
+
   }
   if (config.bg_img_size) {
     bgSizeMode.value = config.bg_img_size;
@@ -226,12 +230,21 @@ jQuery.noConflict();
       if (base64) {
         bgImgInput = base64;
         bgImgPreview.src = base64;
+        bgImgPreview.classList.remove('broken')
       }
     });
   });
 
   // 追加ボタンのイベントリスナー
   addButton.onclick = () => addFieldRow('', '', false, '', '');
+
+  // 背景画像削除ボタンのイベントリスナー
+  pdfImgClearButton.addEventListener('click', (e) => {
+    bgImgInput = '';
+    bgImgPreview.src = '';
+    bgImgPreview.classList.add('broken')
+    document.getElementById('pdf-bg-img').value = ''; // ファイル選択をリセット
+  });
 
   // フォームの送信イベント
   $form.on('submit', function (e) {

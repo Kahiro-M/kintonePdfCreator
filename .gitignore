@@ -142,3 +142,4 @@ vite.config.ts.timestamp-*
 pdfCreator/src/lib/ipaexg-normal.js
 pdfCreator/src/lib/ipaexm-normal.js
 kintone-connect-info.txt
+pdfCreator/npmstart.sh

@@ -107,3 +107,12 @@ img#pdf-bg-img-preview{
 hr.pdfCreator-hr {
   border: 1px solid rgb(227, 231, 232);
 }
+
+
+img:before {
+  content: none;
+}
+img.broken {
+  display: none;
+}
+
