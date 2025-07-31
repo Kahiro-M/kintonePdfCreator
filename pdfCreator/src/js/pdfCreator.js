@@ -203,7 +203,7 @@ const { jsPDF } = window.jspdf;
       fieldCodes.forEach((field, i) => {
         const val = record[field.fieldCode]?.value ?? '(未設定)';
         const label = field.label || field.fieldCode;
-        const output = field.showLabel ? `${label} ${val}` : `${val}`;
+        const output = field.showLabel ? `${label} ${formatValue(val)}` : `${formatValue(val)}`;
 
         // 数値でなければデフォルト位置で印字
         const x = parseFloat(field.x);
@@ -258,6 +258,32 @@ const { jsPDF } = window.jspdf;
 
     return event;
   });
+
+  // オブジェクトや配列を整形してJSON文字列に変換する関数
+  function formatValue(value, indent = 0) {
+    const space = ' '.repeat(indent);
+    if (Array.isArray(value)) { // 配列の場合
+      if (value.length === 0){
+        return `${space}[]`;
+      }
+      // 各要素をインデント付きで出力
+      return value.map((v, i) => `${formatValue(v, indent + 2)}`).join(', ');
+    } else if (typeof value === 'object' && value !== null) { // オブジェクトの場合
+      const entries = Object.entries(value);
+      if (entries.length === 0){ // 空のオブジェクトの場合
+        return `${space}{}`;
+      }
+      // 各キーと値をインデント付きで出力
+      return entries.map(([k, v]) => { //  キーと値をインデント付きで出力
+        const formatted = formatValue(v, indent + 2);
+        return `${space}${k}: ${formatted}`;
+      }).join('\n');
+    } else {
+      return `${value}`; // プリミティブ型（数値・文字列など）はそのまま
+    }
+  }
+
+  // 現在のタイムスタンプを取得する関数
   function getCurrentTimestamp() {
     const now = new Date();
 
