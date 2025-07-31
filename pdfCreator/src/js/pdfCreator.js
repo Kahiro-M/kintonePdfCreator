@@ -76,7 +76,7 @@ const { jsPDF } = window.jspdf;
         const pageH = doc.internal.pageSize.getHeight();
 
         // 解像度：imgのピクセル → mm 変換スケール
-        const pxToMm = (px) => px * 25.4 / 96; // assume 96dpi
+        const pxToMm = (px) => px * 25.4 / 300; // assume 300dpi
 
         const imgWmm = pxToMm(imgW);
         const imgHmm = pxToMm(imgH);
