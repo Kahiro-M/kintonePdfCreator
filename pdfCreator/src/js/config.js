@@ -46,7 +46,6 @@ jQuery.noConflict();
     bgImgPreview.src = config.bg_img;
   }else{
     bgImgPreview.classList.add('broken')
-
   }
   if (config.bg_img_size) {
     bgSizeMode.value = config.bg_img_size;
@@ -166,6 +165,8 @@ jQuery.noConflict();
   // 画像の自動圧縮関数
   function convertAndCompressImage(file, maxWidth = 595, maxBase64Length = 60000, callback) {
     const reader = new FileReader();
+    const mimeType = file.type; // image/png, image/jpeg, image/webp など
+    const isPng = mimeType === 'image/png'; // PNGならtrue
 
     reader.onload = function (e) {
       const img = new Image();
@@ -181,18 +182,27 @@ jQuery.noConflict();
         canvas.height = height;
         const ctx = canvas.getContext('2d');
 
-        // PNGやWEBPでもdrawImageで描画 → JPEGでエクスポート
+        // 背景白塗り（PNGの透過に備えて）
+        if (!isPng) {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
         ctx.drawImage(img, 0, 0, width, height);
 
         let quality = 0.9;
         let base64 = '';
 
-        while (quality >= 0.3) {
-          base64 = canvas.toDataURL('image/jpeg', quality);
-          if (base64.length <= maxBase64Length) break;
-          quality -= 0.05;
+        // 圧縮ループ（PNGは圧縮無し1回だけ）
+        if (isPng) {
+          base64 = canvas.toDataURL('image/png');
+        }else{
+          while (quality >= 0.3) {
+            base64 = canvas.toDataURL('image/jpeg', quality);
+            if (base64.length <= maxBase64Length) break;
+            quality -= 0.05;
+          }
         }
-
         if (base64.length > maxBase64Length) {
           alert('画像を自動圧縮しましたが、容量制限を超えています。さらに小さい画像を選んでください。');
           callback(null);
