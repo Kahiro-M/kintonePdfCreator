@@ -53,12 +53,14 @@
 
 }
 
+.field-cell.fld-maxw,
 .field-cell.fld-x,
 .field-cell.fld-y,
 input.pdf-title-fontsize,
 input.pdf-body-fontsize,
 input.pdf-title-fld-x,
 input.pdf-title-fld-y,
+.field-cell.fld-maxw .kuc-text-1-21-0__group,
 .field-cell.fld-x .kuc-text-1-21-0__group,
 .field-cell.fld-y .kuc-text-1-21-0__group{
   width: 65px;

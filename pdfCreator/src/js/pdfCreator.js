@@ -208,11 +208,14 @@ const { jsPDF } = window.jspdf;
         // 数値でなければデフォルト位置で印字
         const x = parseFloat(field.x);
         const y = parseFloat(field.y);
+        const maxw = Number.isNaN(parseFloat(field.maxw)) ? Infinity : parseFloat(field.maxw);
         
         if (!isNaN(x) && !isNaN(y)) {
-          doc.text(output, x, y);
+          const defaultMaxW = doc.internal.pageSize.getWidth()-x;
+          doc.text(output, x, y,{ maxWidth:Math.min(maxw,defaultMaxW) });
         } else {
-          doc.text(output, defaultX, defaultY);
+          const defaultMaxW = doc.internal.pageSize.getWidth()-defaultX;
+          doc.text(output, defaultX, defaultY,{ maxWidth:Math.min(maxw,defaultMaxW) });
           defaultY += 10;
         }
       });

@@ -72,20 +72,18 @@ jQuery.noConflict();
 
   client.app.getFormFields({ app: appId }).then((resp) => {
     for (const [code, prop] of Object.entries(resp.properties)) {
-      if (prop.type === 'SINGLE_LINE_TEXT' || prop.type === 'DATE') {
-        fieldOptions.push({ label: `${prop.label}（${code}）`, value: code });
-      }
+      fieldOptions.push({ label: `${prop.label}（${code}）`, value: code });
     }
     // フィールドコードの選択肢生成
     if (savedFields.length > 0) {
-      savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label, obj.showLabel, obj.x, obj.y));
+      savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label, obj.showLabel, obj.x, obj.y, obj.maxw));
     } else {
-      addFieldRow('', '', false, '', '');
+      addFieldRow('', '', false, '', '', '');
     }
   });
 
   // PDF追加項目の行を追加する関数
-  function addFieldRow(selectedValue, labelValue, showLabel, x, y) {
+  function addFieldRow(selectedValue, labelValue, showLabel, x, y, maxw) {
     // 行の要素を生成
     const row = document.createElement('div');
     row.className = 'field-row kintoneplugin-row';
@@ -122,6 +120,12 @@ jQuery.noConflict();
       className: 'field-y'
     });
 
+    const maxwInput = new Kuc.Text({
+      value: maxw || '',
+      placeholder: '最大横幅',
+      className: 'field-maxw'
+    });
+
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.textContent = '✕';
@@ -149,6 +153,10 @@ jQuery.noConflict();
     yCell.className = 'field-cell fld-y';
     yCell.appendChild(yInput);
 
+    const maxwCell = document.createElement('div');
+    maxwCell.className = 'field-cell fld-maxw';
+    maxwCell.appendChild(maxwInput);
+
     const removeCell = document.createElement('div');
     removeCell.className = 'field-cell dl-btn';
     removeCell.appendChild(removeBtn);
@@ -158,6 +166,7 @@ jQuery.noConflict();
     row.appendChild(selectCell);
     row.appendChild(xCell);
     row.appendChild(yCell);
+    row.appendChild(maxwCell);
     row.appendChild(removeCell);
 
     // プロパティとして保持しておく
@@ -166,6 +175,7 @@ jQuery.noConflict();
     row._shwchbx = checkbox;
     row._x = xInput;
     row._y = yInput;
+    row._maxw = maxwInput;
 
     fieldContainer.appendChild(row);
   }
@@ -254,7 +264,7 @@ jQuery.noConflict();
   });
 
   // 追加ボタンのイベントリスナー
-  addButton.onclick = () => addFieldRow('', '', false, '', '');
+  addButton.onclick = () => addFieldRow('', '', false, '', '', '');
 
   // 背景画像削除ボタンのイベントリスナー
   pdfImgClearButton.addEventListener('click', (e) => {
@@ -274,6 +284,7 @@ jQuery.noConflict();
         fieldCode: row._fldcd.value,
         label: row._lbtxt.value.trim(),
         showLabel: row._shwchbx.value.includes('show'),
+        maxw: row._maxw.value.trim(),
         x: row._x.value.trim(),
         y: row._y.value.trim()
       };
