@@ -8,3 +8,9 @@
   margin: 0.8rem;
   margin-top: 0;
 }
+.pdf-preview.preview-hide {
+  display: none;
+}
+.pdf-preview.preview-show {
+  display: block;
+}

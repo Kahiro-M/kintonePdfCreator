@@ -9,7 +9,7 @@ const { jsPDF } = window.jspdf;
     const recordId = kintone.app.record.getId();
     const appId = kintone.app.getId();
     const timestamp = getCurrentTimestamp();
-    const previewSpace = kintone.app.record.getSpaceElement('pdf_preview_space');
+    const previewSpace = getPreviewSpace('pdf_preview_space');
     if (previewSpace) {
       previewSpace.innerHTML = '';
       previewSpace.style.height = '600px';
@@ -256,6 +256,11 @@ const { jsPDF } = window.jspdf;
       downloadDoc.save('app'+appId+'_record'+recordId+'_'+timestamp+'.pdf');
     };
 
+    // プレビュー表示ボタン
+    document.getElementById('show_pdf_preview_space').addEventListener('click', (e) => {
+      previewSpace.slideToggle();
+    });
+
     return event;
   });
 
@@ -282,6 +287,30 @@ const { jsPDF } = window.jspdf;
       return `${value}`; // プリミティブ型（数値・文字列など）はそのまま
     }
   }
+
+  // プレビュー表示スペース取得or作成する関数
+  function getPreviewSpace(idName='pdf_preview_space') {
+    const previewSpaceOnRecordBody = kintone.app.record.getSpaceElement(idName);
+    if (previewSpaceOnRecordBody) {
+      return kintone.app.record.getSpaceElement(idName);
+    }else{
+      // ヘッダーメニューにプレビューボタンを追加
+      const previewBtn = document.createElement('button');
+      previewBtn.id = 'show_pdf_preview_space';
+      previewBtn.textContent = 'プレビュー表示👁️';
+      previewBtn.className = 'kintoneplugin-button-normal'; // kintone風の見た目に
+      previewBtn.style.marginLeft = '8px';
+      kintone.app.record.getHeaderMenuSpaceElement().appendChild(previewBtn);
+      // プレビュー表示スペースをヘッダーメニューに追加
+      const previewSpaceOnHeader = document.createElement('div');
+      previewSpaceOnHeader.id = idName;
+      previewSpaceOnHeader.className = "pdf-preview preview-hide";
+      kintone.app.record.getHeaderMenuSpaceElement().appendChild(previewSpaceOnHeader);
+      return document.getElementById(idName);
+
+    }
+  }
+
 
   // 現在のタイムスタンプを取得する関数
   function getCurrentTimestamp() {
