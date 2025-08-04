@@ -144,3 +144,6 @@ vite.config.ts.timestamp-*
 
 kintone-connect-info.txt
 pdfCreator/npmstart.sh
+
+*.ppk
+.vscode/settings.json
