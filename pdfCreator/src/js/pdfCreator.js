@@ -258,7 +258,7 @@ const { jsPDF } = window.jspdf;
 
     // プレビュー表示ボタン
     document.getElementById('show_pdf_preview_space').addEventListener('click', (e) => {
-      previewSpace.slideToggle();
+      $('.pdf-preview').slideToggle();
     });
 
     return event;
