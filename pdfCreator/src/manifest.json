@@ -7,6 +7,7 @@
       "https://js.cybozu.com/jquery/3.3.1/jquery.min.js",
       "lib/kuc.min.js",
       "lib/jspdf.umd.min.js",
+      "lib/pdf-lib.min.js",
       "lib/NotoSansJPGothic-normal.js",
       "lib/NotoSerifJPMincho-normal.js",
       "lib/ipaexg-normal.js",

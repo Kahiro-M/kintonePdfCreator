@@ -4,6 +4,54 @@ const { jsPDF } = window.jspdf;
   'use strict';
   const PLUGIN_ID = kintone.$PLUGIN_ID;
 
+  kintone.events.on('app.record.index.show', async function (event) {
+    const config = kintone.plugin.app.getConfig(PLUGIN_ID);
+    try{
+      const records = event.records;
+      const appId = event.appId;
+      const viewType = event.viewType;
+      const offset = event.offset;
+      const size = event.size;
+      const qry = kintone.app.getQueryCondition();
+
+      const resconfirm = confirm('現在の一覧でPDF出力をします。\n【検索条件】\n'+qry);
+      if(!resconfirm){
+        return event;
+      }
+
+      // カーソルAPIでレコード取得
+      const body = {
+        app: appId,
+        query: qry,
+        size: 500
+      };
+      let cursor = await kintone.api(kintone.api.url('/k/v1/records/cursor.json', true), 'POST', body);
+
+      // レコードが1件以上ある場合のみ処理
+      if(Number(cursor.totalCount)>0){
+        let allRecords = [];
+        let allPDF = [];
+        let next = true;
+        while(next){
+          // カーソルを利用して全レコードを配列に格納
+          const resp = await kintone.api(kintone.api.url('/k/v1/records/cursor.json', true), 'GET', { id: cursor.id });
+          allRecords.push(resp.records);
+          for (let i = 0; i < Number(cursor.totalCount); i++) {
+            const doc = await createPDF(records[i],config);
+            allPDF.push(doc);
+          }
+          next = resp.next;
+        }
+
+        // 結合して1つのPDFとして出力
+        await downloadMergeJsPdfDocs(allPDF);
+      }
+    }catch(err){
+      console.error(err);
+    }
+    return event;
+  });
+
   kintone.events.on('app.record.detail.show', function (event) {
     const record = event.record;
     const recordId = event.recordId;
@@ -311,6 +359,43 @@ const { jsPDF } = window.jspdf;
     }
   }
 
+// 複数の jsPDF オブジェクトを連結して1つにする関数
+async function downloadMergeJsPdfDocs(jsPDFDocs) {
+  // pdf結合してByteデータを取得
+  const mergedBytes = await mergeJsPdfDocs(jsPDFDocs);
+  
+  // 結合後のPDFをBlobに変換してダウンロード
+  const blob = new Blob([mergedBytes], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "merged.pdf";
+  // console.log(a.href);
+  
+  a.click();
+  URL.revokeObjectURL(url);
+
+  console.log("PDF結合&ダウンロード完了");
+}
+
+// 複数の jsPDF オブジェクトを連結して1つにする関数
+async function mergeJsPdfDocs(jsPDFDocs) {
+  // pdf-libを使用
+  const mergedPdf = await PDFLib.PDFDocument.create();
+
+  for (const doc of jsPDFDocs) {
+    // jsPDFインスタンスをArrayBuffer化
+    const pdfBytes = doc.output('arraybuffer');
+    const srcPdf = await PDFLib.PDFDocument.load(pdfBytes);
+
+    // ページをコピーして追加
+    const copiedPages = await mergedPdf.copyPages(srcPdf, srcPdf.getPageIndices());
+    copiedPages.forEach((page) => mergedPdf.addPage(page));
+  }
+
+  return await mergedPdf.save();
+}
 
   // 現在のタイムスタンプを取得する関数
   function getCurrentTimestamp() {
