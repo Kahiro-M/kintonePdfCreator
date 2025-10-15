@@ -5,50 +5,65 @@ const { jsPDF } = window.jspdf;
   const PLUGIN_ID = kintone.$PLUGIN_ID;
 
   kintone.events.on('app.record.index.show', async function (event) {
-    const config = kintone.plugin.app.getConfig(PLUGIN_ID);
-    try{
-      const records = event.records;
-      const appId = event.appId;
-      const viewType = event.viewType;
-      const offset = event.offset;
-      const size = event.size;
-      const qry = kintone.app.getQueryCondition();
+    if(document.getElementById('pdf-export-button')===null){
+      const exportBtn = document.createElement('button');
+      exportBtn.id = 'pdf-export-button';
+      exportBtn.textContent = '結合PDF出力📃';
+      exportBtn.className = 'kintoneplugin-button-normal'; // kintone風の見た目に
+      exportBtn.style.marginLeft = '8px';
+      kintone.app.getHeaderMenuSpaceElement().appendChild(exportBtn);
+    }
+    const btn = document.getElementById('pdf-export-button');
 
-      const resconfirm = confirm('現在の一覧でPDF出力をします。\n【検索条件】\n'+qry);
-      if(!resconfirm){
-        return event;
-      }
+    // 出力ボタンクリック時の処理
+    btn.onclick = async function () {
+      const config = kintone.plugin.app.getConfig(PLUGIN_ID);
+      try{
+        const records = event.records;
+        const appId = event.appId;
+        const viewType = event.viewType;
+        const offset = event.offset;
+        const size = event.size;
+        const qry = kintone.app.getQueryCondition();
 
-      // カーソルAPIでレコード取得
-      const body = {
-        app: appId,
-        query: qry,
-        size: 500
-      };
-      let cursor = await kintone.api(kintone.api.url('/k/v1/records/cursor.json', true), 'POST', body);
-
-      // レコードが1件以上ある場合のみ処理
-      if(Number(cursor.totalCount)>0){
-        let allRecords = [];
-        let allPDF = [];
-        let next = true;
-        while(next){
-          // カーソルを利用して全レコードを配列に格納
-          const resp = await kintone.api(kintone.api.url('/k/v1/records/cursor.json', true), 'GET', { id: cursor.id });
-          allRecords.push(resp.records);
-          for (let i = 0; i < Number(cursor.totalCount); i++) {
-            const doc = await createPDF(records[i],config);
-            allPDF.push(doc);
-          }
-          next = resp.next;
+        const resconfirm = confirm('現在の一覧でPDF出力をします。\n【検索条件】\n'+qry);
+        if(!resconfirm){
+          return event;
         }
 
-        // 結合して1つのPDFとして出力
-        await downloadMergeJsPdfDocs(allPDF);
+        // カーソルAPIでレコード取得
+        const body = {
+          app: appId,
+          query: qry,
+          size: 500
+        };
+        let cursor = await kintone.api(kintone.api.url('/k/v1/records/cursor.json', true), 'POST', body);
+
+        // レコードが1件以上ある場合のみ処理
+        if(Number(cursor.totalCount)>0){
+          let allRecords = [];
+          let allPDF = [];
+          let next = true;
+          while(next){
+            // カーソルを利用して全レコードを配列に格納
+            const resp = await kintone.api(kintone.api.url('/k/v1/records/cursor.json', true), 'GET', { id: cursor.id });
+            allRecords.push(resp.records);
+            for (let i = 0; i < Number(cursor.totalCount); i++) {
+              const doc = await createPDF(records[i],config);
+              allPDF.push(doc);
+            }
+            next = resp.next;
+          }
+
+          // 結合して1つのPDFとして出力
+          await downloadMergeJsPdfDocs(allPDF);
+        }
+      }catch(err){
+        console.error(err);
       }
-    }catch(err){
-      console.error(err);
-    }
+
+
+    };
     return event;
   });
 
