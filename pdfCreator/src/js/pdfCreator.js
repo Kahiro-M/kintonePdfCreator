@@ -51,7 +51,7 @@ const { jsPDF } = window.jspdf;
             const resp = await kintone.api(kintone.api.url('/k/v1/records/cursor.json', true), 'GET', { id: cursor.id });
             allRecords.push(resp.records);
             for (let i = 0; i < Number(cursor.totalCount); i++) {
-              const doc = await createPDF(records[i],config);
+              const doc = await createPDF(resp.records[i],config);
               allPDF.push(doc);
             }
             next = resp.next;
