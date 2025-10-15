@@ -165,7 +165,10 @@ const { jsPDF } = window.jspdf;
    * PDF作成関数（複数フィールド対応）
    */
   async function createPDF(record,config) {
-    const doc = new jsPDF();
+    const doc = new jsPDF({
+      compress: true,      // 内部圧縮を有効化
+      putOnlyUsedFonts: true, // 使ったフォントだけ埋め込む
+    });
     const fieldCodes = config.fields ? JSON.parse(config.fields) : [];
 
     // 背景画像の設定
