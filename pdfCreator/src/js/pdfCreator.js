@@ -25,6 +25,7 @@ const { jsPDF } = window.jspdf;
         const offset = event.offset;
         const size = event.size;
         const qry = kintone.app.getQueryCondition();
+        const fieldCodes = JSON.parse(config.fields).map(f => f.fieldCode);
 
         const resconfirm = confirm('現在の一覧でPDF出力をします。\n【検索条件】\n'+qry);
         if(!resconfirm){
@@ -34,6 +35,7 @@ const { jsPDF } = window.jspdf;
         // カーソルAPIでレコード取得
         const body = {
           app: appId,
+          fields: fieldCodes,
           query: qry,
           size: 500
         };
@@ -56,12 +58,22 @@ const { jsPDF } = window.jspdf;
           }
 
           // 結合して1つのPDFとして出力
-          await downloadMergeJsPdfDocs(allPDF);
+          await downloadMergeJsPdfDocs(allPDF,'app'+appId+'_records_'+getCurrentTimestamp()+'.pdf');
+          // 出力条件をテキストでダウンロード
+          const qryBlob = new Blob([qry || '(条件なし)'], { type: "text/plain" });
+          const qryUrl = URL.createObjectURL(qryBlob);
+          // 一時的な<a>タグでダウンロード実行
+          const a = document.createElement('a');
+          a.href = qryUrl;
+          a.download = 'app'+appId+'_records_'+getCurrentTimestamp()+'_検索条件.txt';
+          a.click();
+
+          // メモリ解放
+          URL.revokeObjectURL(qryUrl);
         }
       }catch(err){
         console.error(err);
       }
-
 
     };
     return event;
@@ -375,22 +387,22 @@ const { jsPDF } = window.jspdf;
   }
 
 // 複数の jsPDF オブジェクトを連結して1つにする関数
-async function downloadMergeJsPdfDocs(jsPDFDocs) {
+async function downloadMergeJsPdfDocs(jsPDFDocs,filename='merged.pdf') {
   // pdf結合してByteデータを取得
   const mergedBytes = await mergeJsPdfDocs(jsPDFDocs);
   
   // 結合後のPDFをBlobに変換してダウンロード
   const blob = new Blob([mergedBytes], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
-
+  
+  // 一時的な<a>タグでダウンロード実行
   const a = document.createElement("a");
   a.href = url;
-  a.download = "merged.pdf";
-  // console.log(a.href);
-  
+  a.download = filename;
   a.click();
-  URL.revokeObjectURL(url);
 
+  // メモリ解放
+  URL.revokeObjectURL(url);
   console.log("PDF結合&ダウンロード完了");
 }
 
