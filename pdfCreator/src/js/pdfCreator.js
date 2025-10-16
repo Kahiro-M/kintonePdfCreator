@@ -41,6 +41,15 @@ const { jsPDF } = window.jspdf;
         };
         let cursor = await kintone.api(kintone.api.url('/k/v1/records/cursor.json', true), 'POST', body);
 
+        let meta = {
+          title:config.title,
+          author:'kintone PDF Creator',
+          subject:config.title,
+          keywords:qry,
+          creator:'kintone PDF Creator',
+          producer:'kintone PDF Creator',
+        }
+
         // レコードが1件以上ある場合のみ処理
         if(Number(cursor.totalCount)>0){
           let allRecords = [];
@@ -51,25 +60,14 @@ const { jsPDF } = window.jspdf;
             const resp = await kintone.api(kintone.api.url('/k/v1/records/cursor.json', true), 'GET', { id: cursor.id });
             allRecords.push(resp.records);
             for (let i = 0; i < Number(cursor.totalCount); i++) {
-              const doc = await createPDF(resp.records[i],config);
+              const doc = await createPDF(resp.records[i],config,meta);
               allPDF.push(doc);
             }
             next = resp.next;
           }
 
           // 結合して1つのPDFとして出力
-          await downloadMergeJsPdfDocs(allPDF,'app'+appId+'_records_'+getCurrentTimestamp()+'.pdf');
-          // 出力条件をテキストでダウンロード
-          const qryBlob = new Blob([qry || '(条件なし)'], { type: "text/plain" });
-          const qryUrl = URL.createObjectURL(qryBlob);
-          // 一時的な<a>タグでダウンロード実行
-          const a = document.createElement('a');
-          a.href = qryUrl;
-          a.download = 'app'+appId+'_records_'+getCurrentTimestamp()+'_検索条件.txt';
-          a.click();
-
-          // メモリ解放
-          URL.revokeObjectURL(qryUrl);
+          await downloadMergeJsPdfDocs(allPDF,'app'+appId+'_records_'+getCurrentTimestamp()+'.pdf',meta);
         }
       }catch(err){
         console.error(err);
@@ -164,11 +162,41 @@ const { jsPDF } = window.jspdf;
   /**
    * PDF作成関数（複数フィールド対応）
    */
-  async function createPDF(record,config) {
+  async function createPDF(record,config,meta={title:'',author:'kintone PDF Creator',subject:'',keywords:'',creator:'kintone PDF Creator',producer:'kintone PDF Creator'}) {
     const doc = new jsPDF({
       compress: true,      // 内部圧縮を有効化
       putOnlyUsedFonts: true, // 使ったフォントだけ埋め込む
     });
+
+    let tmpMeta = {};
+    // ===== メタデータ設定 =====
+    if(meta.title){
+      tmpMeta = meta.title;
+    }
+    if(meta.author){
+      tmpMeta = meta.author;
+    }
+    if(meta.subject){
+      tmpMeta = meta.subject;
+    }
+    if(meta.keywords){
+      tmpMeta = meta.keywords;
+    }
+    if(meta.creator){
+      tmpMeta = meta.creator;
+    }
+    if(meta.producer){
+      tmpMeta = meta.producer;
+    }
+    // PDFのメタデータ
+    doc.setProperties({
+      title: config.title || tmpMeta.title || '',
+      subject: tmpMeta.subject || '',
+      keywords: tmpMeta.keywords || '',
+      creator: tmpMeta.creator || 'kintone PDF Creator',
+    });
+
+    // フィールドコードの配列
     const fieldCodes = config.fields ? JSON.parse(config.fields) : [];
 
     // 背景画像の設定
@@ -390,9 +418,9 @@ const { jsPDF } = window.jspdf;
   }
 
 // 複数の jsPDF オブジェクトを連結して1つにする関数
-async function downloadMergeJsPdfDocs(jsPDFDocs,filename='merged.pdf') {
+async function downloadMergeJsPdfDocs(jsPDFDocs,filename='merged.pdf',meta={title:'',author:'kintone PDF Creator',subject:'',keywords:'',creator:'kintone PDF Creator',producer:'kintone PDF Creator'}) {
   // pdf結合してByteデータを取得
-  const mergedBytes = await mergeJsPdfDocs(jsPDFDocs);
+  const mergedBytes = await mergeJsPdfDocs(jsPDFDocs,meta);
   
   // 結合後のPDFをBlobに変換してダウンロード
   const blob = new Blob([mergedBytes], { type: "application/pdf" });
@@ -410,7 +438,7 @@ async function downloadMergeJsPdfDocs(jsPDFDocs,filename='merged.pdf') {
 }
 
 // 複数の jsPDF オブジェクトを連結して1つにする関数
-async function mergeJsPdfDocs(jsPDFDocs) {
+async function mergeJsPdfDocs(jsPDFDocs,meta={title:'',author:'kintone PDF Creator',subject:'',keywords:'',creator:'kintone PDF Creator',producer:'kintone PDF Creator'}) {
   // pdf-libを使用
   const mergedPdf = await PDFLib.PDFDocument.create();
 
@@ -422,6 +450,26 @@ async function mergeJsPdfDocs(jsPDFDocs) {
     // ページをコピーして追加
     const copiedPages = await mergedPdf.copyPages(srcPdf, srcPdf.getPageIndices());
     copiedPages.forEach((page) => mergedPdf.addPage(page));
+  }
+
+  // ===== メタデータ設定 =====
+  if(meta.title){
+    mergedPdf.setTitle(meta.title);
+  }
+  if(meta.author){
+    mergedPdf.setAuthor(meta.author);
+  }
+  if(meta.subject){
+    mergedPdf.setSubject(meta.subject);
+  }
+  if(meta.keywords){
+    mergedPdf.setKeywords([meta.keywords]);
+  }
+  if(meta.creator){
+    mergedPdf.setCreator(meta.creator);
+  }
+  if(meta.producer){
+    mergedPdf.setProducer(meta.producer);
   }
 
   return await mergedPdf.save();
