@@ -74,6 +74,10 @@ jQuery.noConflict();
     for (const [code, prop] of Object.entries(resp.properties)) {
       fieldOptions.push({ label: `${prop.label}（${code}）`, value: code });
     }
+
+    // ラベル名でソート
+    fieldOptions.sort((a, b) => a.label.localeCompare(b.label));
+
     // フィールドコードの選択肢生成
     if (savedFields.length > 0) {
       savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label, obj.showLabel, obj.x, obj.y, obj.maxw));
