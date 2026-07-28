@@ -14,3 +14,10 @@
 .pdf-preview.preview-show {
   display: block;
 }
+
+button#show_pdf_preview_space,
+button#pdf-export-button{
+  height: 40px;
+  line-height: 40px;
+  font-size: 14px;
+}
