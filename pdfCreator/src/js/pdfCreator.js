@@ -356,7 +356,7 @@ const { jsPDF } = window.jspdf;
     let defaultY = 40;
 
     pageFields.forEach((field, i) => {
-      const val = record[field.fieldCode]?.value ?? '(未設定)';
+      const val = record[field.fieldCode]?.value ?? config.null_value ?? '(未設定)';
       const label = field.label || field.fieldCode;
       const output = field.showLabel ? `${label} ${formatValue(val)}` : `${formatValue(val)}`;
 

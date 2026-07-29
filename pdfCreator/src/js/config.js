@@ -24,6 +24,7 @@ jQuery.noConflict();
   let bgSizeMode = document.getElementById('pdf-bg-img-size-mode');
   let bgImgAlignX = document.getElementById('pdf-bg-img-align-x');
   let bgImgAlignY = document.getElementById('pdf-bg-img-align-y');
+  let nullValueStr = document.getElementById('pdf-null-value');
 
   // kintoneのプラグイン設定から初期値を取得
   const config = kintone.plugin.app.getConfig(PLUGIN_ID);
@@ -63,6 +64,9 @@ jQuery.noConflict();
   }
   if (config.bg_img_size) {
     bgImgAlignY.value = config.bg_img_align_y;
+  }
+  if (config.null_value) {
+    nullValueStr.value = config.null_value;
   }
 
   // フィールドコードの選択肢を取得
@@ -324,6 +328,7 @@ jQuery.noConflict();
     const pdf_bg_img_size = document.getElementById('pdf-bg-img-size-mode').value.trim();
     const pdf_bg_img_align_x = document.getElementById('pdf-bg-img-align-x').value.trim();
     const pdf_bg_img_align_y = document.getElementById('pdf-bg-img-align-y').value.trim();
+    const pdf_null_value = document.getElementById('pdf-null-value').value.trim();
 
     kintone.plugin.app.setConfig({
       title: pdf_title,
@@ -337,6 +342,7 @@ jQuery.noConflict();
       bg_img_size: pdf_bg_img_size,
       bg_img_align_x: pdf_bg_img_align_x,
       bg_img_align_y: pdf_bg_img_align_y,
+      null_value: pdf_null_value,
       fields: JSON.stringify(values)
     }, () => {
       window.location.href = '../../' + kintone.app.getId() + '/plugin/';
