@@ -84,14 +84,14 @@ jQuery.noConflict();
 
     // フィールドコードの選択肢生成
     if (savedFields.length > 0) {
-      savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label, obj.showLabel, obj.x, obj.y, obj.maxw, obj.pnum));
+      savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label, obj.showLabel, obj.x, obj.y, obj.maxw, obj.pnum, obj.tbl));
     } else {
-      addFieldRow('', '', false, '', '', '', '1');
+      addFieldRow('', '', false, '', '', '', '1', false);
     }
   });
 
   // PDF追加項目の行を追加する関数
-  function addFieldRow(selectedValue, labelValue, showLabel, x, y, maxw, pnum) {
+  function addFieldRow(selectedValue, labelValue, showLabel, x, y, maxw, pnum, tbl) {
     // 行の要素を生成
     const row = document.createElement('div');
     row.className = 'field-row kintoneplugin-row';
@@ -140,6 +140,12 @@ jQuery.noConflict();
       className: 'field-pnum',
     });
 
+    const tblCheckbox = new Kuc.Checkbox({
+      items: [{ label: '表形式', value: 'tbl' }],
+      value: tbl ? ['tbl'] : [],
+      className: 'field-table'
+    });
+
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.textContent = '✕';
@@ -175,6 +181,10 @@ jQuery.noConflict();
     pageNumberCell.className = 'field-cell fld-pnum';
     pageNumberCell.appendChild(pageNumberInput);
 
+    const tblCheckboxCell = document.createElement('div');
+    tblCheckboxCell.className = 'field-cell tbl-chbx';
+    tblCheckboxCell.appendChild(tblCheckbox);
+
     const removeCell = document.createElement('div');
     removeCell.className = 'field-cell dl-btn';
     removeCell.appendChild(removeBtn);
@@ -186,6 +196,7 @@ jQuery.noConflict();
     row.appendChild(yCell);
     row.appendChild(maxwCell);
     row.appendChild(pageNumberCell);
+    row.appendChild(tblCheckboxCell);
     row.appendChild(removeCell);
 
     // プロパティとして保持しておく
@@ -196,7 +207,7 @@ jQuery.noConflict();
     row._y = yInput;
     row._maxw = maxwInput;
     row._pnum = pageNumberInput;
-
+    row._tblchbx = tblCheckbox;
     fieldContainer.appendChild(row);
   }
 
@@ -307,7 +318,8 @@ jQuery.noConflict();
         maxw: row._maxw.value.trim(),
         pnum: row._pnum.value.trim(),
         x: row._x.value.trim(),
-        y: row._y.value.trim()
+        y: row._y.value.trim(),
+        tbl: row._tblchbx.value.includes('tbl'),
       };
     }).filter(v => v.fieldCode);
 

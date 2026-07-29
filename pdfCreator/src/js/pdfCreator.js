@@ -358,8 +358,15 @@ const { jsPDF } = window.jspdf;
     pageFields.forEach((field, i) => {
       const val = record[field.fieldCode]?.value ?? config.null_value ?? '(未設定)';
       const label = field.label || field.fieldCode;
-      const output = field.showLabel ? `${label} ${formatValue(val)}` : `${formatValue(val)}`;
+      if (field.tbl) {
+        // 表形式で出力する場合は、Markdown形式のテーブルに変換して出力
+        var outputTable = formatAsTable(val);
+      }else{
+        var outputStr = field.showLabel ? `${label} ${formatValue(val)}` : `${formatValue(val)}`;
+      }
 
+      const output = field.tbl ? outputTable : outputStr;
+      
       // 数値でなければデフォルト位置で印字
       const x = parseFloat(field.x);
       const y = parseFloat(field.y);
@@ -396,7 +403,6 @@ const { jsPDF } = window.jspdf;
   }
 
   // オブジェクトや配列を整形してJSON文字列に変換する関数
-  // オブジェクトや配列を整形してJSON文字列に変換する関数
   function formatValue(value, indent = 0) {
     const space = ' '.repeat(indent);
 
@@ -410,7 +416,7 @@ const { jsPDF } = window.jspdf;
         // 各要素に value プロパティがあり、それがオブジェクトの場合
         if (item && item.value && typeof item.value === 'object') {
           const flattened = {};
-          
+
           // value オブジェクト内の各フィールドから value プロパティを抽出
           Object.entries(item.value).forEach(([key, fieldObj]) => {
             if (fieldObj && typeof fieldObj === 'object' && 'value' in fieldObj) {
@@ -430,7 +436,7 @@ const { jsPDF } = window.jspdf;
       
     } else if (typeof value === 'object' && value !== null) {
       const entries = Object.entries(value);
-      
+
       if (entries.length === 0) {
         return `${space}{}`;
       }
@@ -443,6 +449,50 @@ const { jsPDF } = window.jspdf;
     } else {
       return `${value}`;
     }
+  }
+
+    // テーブルフィールドのデータをMarkdown形式のテーブルに変換する関数
+  function formatAsTable(data) {
+    if (!Array.isArray(data) || data.length === 0) {
+      return '（データなし）';
+    }
+
+    // 配列の各要素から value オブジェクトを抽出し、フラット化
+    const rows = data.map((item) => {
+      if (!item.value || typeof item.value !== 'object') {
+        return null;
+      }
+
+      const flattened = {};
+      Object.entries(item.value).forEach(([key, fieldObj]) => {
+        if (fieldObj && typeof fieldObj === 'object' && 'value' in fieldObj) {
+          flattened[key] = fieldObj.value;
+        } else {
+          flattened[key] = fieldObj;
+        }
+      });
+      return flattened;
+    }).filter(row => row !== null);
+
+    if (rows.length === 0) {
+      return '（有効なデータなし）';
+    }
+
+    // テーブルのヘッダーを取得（最初の行のキー）
+    const headers = Object.keys(rows[0]);
+
+    // Markdown テーブルのヘッダー行を生成
+    const headerRow = '| ' + headers.join(' | ') + ' |';
+    const separatorRow = '| ' + headers.map(() => '---').join(' | ') + ' |';
+
+    // データ行を生成
+    const dataRows = rows.map((row) => {
+      const values = headers.map((header) => row[header] ?? '');
+      return '| ' + values.join(' | ') + ' |';
+    });
+
+    // テーブル全体を結合
+    return [headerRow, separatorRow, ...dataRows].join('\n');
   }
 
   // プレビュー表示スペース取得or作成する関数
