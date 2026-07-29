@@ -80,14 +80,14 @@ jQuery.noConflict();
 
     // フィールドコードの選択肢生成
     if (savedFields.length > 0) {
-      savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label, obj.showLabel, obj.x, obj.y, obj.maxw));
+      savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label, obj.showLabel, obj.x, obj.y, obj.maxw, obj.pnum));
     } else {
-      addFieldRow('', '', false, '', '', '');
+      addFieldRow('', '', false, '', '', '', '1');
     }
   });
 
   // PDF追加項目の行を追加する関数
-  function addFieldRow(selectedValue, labelValue, showLabel, x, y, maxw) {
+  function addFieldRow(selectedValue, labelValue, showLabel, x, y, maxw, pnum) {
     // 行の要素を生成
     const row = document.createElement('div');
     row.className = 'field-row kintoneplugin-row';
@@ -129,6 +129,12 @@ jQuery.noConflict();
       placeholder: '最大横幅',
       className: 'field-maxw'
     });
+    
+    const pageNumberInput = new Kuc.Text({
+      value: pnum || '',
+      placeholder: 'ページ',
+      className: 'field-pnum',
+    });
 
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
@@ -161,6 +167,10 @@ jQuery.noConflict();
     maxwCell.className = 'field-cell fld-maxw';
     maxwCell.appendChild(maxwInput);
 
+    const pageNumberCell = document.createElement('div');
+    pageNumberCell.className = 'field-cell fld-pnum';
+    pageNumberCell.appendChild(pageNumberInput);
+
     const removeCell = document.createElement('div');
     removeCell.className = 'field-cell dl-btn';
     removeCell.appendChild(removeBtn);
@@ -171,6 +181,7 @@ jQuery.noConflict();
     row.appendChild(xCell);
     row.appendChild(yCell);
     row.appendChild(maxwCell);
+    row.appendChild(pageNumberCell);
     row.appendChild(removeCell);
 
     // プロパティとして保持しておく
@@ -180,6 +191,7 @@ jQuery.noConflict();
     row._x = xInput;
     row._y = yInput;
     row._maxw = maxwInput;
+    row._pnum = pageNumberInput;
 
     fieldContainer.appendChild(row);
   }
@@ -268,7 +280,7 @@ jQuery.noConflict();
   });
 
   // 追加ボタンのイベントリスナー
-  addButton.onclick = () => addFieldRow('', '', false, '', '', '');
+  addButton.onclick = () => addFieldRow('', '', false, '', '', '', '1');
 
   // 背景画像削除ボタンのイベントリスナー
   pdfImgClearButton.addEventListener('click', (e) => {
@@ -289,6 +301,7 @@ jQuery.noConflict();
         label: row._lbtxt.value.trim(),
         showLabel: row._shwchbx.value.includes('show'),
         maxw: row._maxw.value.trim(),
+        pnum: row._pnum.value.trim(),
         x: row._x.value.trim(),
         y: row._y.value.trim()
       };
