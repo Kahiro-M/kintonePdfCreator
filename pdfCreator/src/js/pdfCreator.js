@@ -199,6 +199,26 @@ const { jsPDF } = window.jspdf;
     // フィールドコードの配列
     const fieldCodes = config.fields ? JSON.parse(config.fields) : [];
 
+    // 生成すべきページ数の最大数を取得
+    const maxPage = Math.max(...fieldCodes.map(f => f.pnum || 1),1);
+    
+    // ページごとにフィールドをグループ化
+    const fieldsByPage = {};
+    fieldCodes.forEach(field => {
+      const pageNum = parseInt(field.pnum) || 1;
+      if (!fieldsByPage[pageNum]) {
+        fieldsByPage[pageNum] = [];
+      }
+      fieldsByPage[pageNum].push(field);
+    });
+
+  // ===== ページごとに処理 =====
+  for (let pageNum = 1; pageNum <= maxPage; pageNum++) {
+    // 2ページ目以降は新規ページを追加
+    if (pageNum > 1) {
+      doc.addPage();
+    }
+
     // 背景画像の設定
     const bgImg = config.bg_img;
     if (bgImg) {
@@ -284,33 +304,36 @@ const { jsPDF } = window.jspdf;
       }
     }
 
-    // タイトルフォントの設定
-    doc.setFont(config.title_font);
+    // ===== タイトル出力（1ページ目のみ） =====
+    if (pageNum === 1) {
+      // タイトルフォントの設定
+      doc.setFont(config.title_font);
 
-    // 設定されたタイトルを出力
-    const title = config.title || '';
-    // デフォルトのタイトルフォントサイズ
-    const defaultTitleFontsize = 16;
-    // 数値でなければデフォルトタイトルフォントサイズで印字
-    const titleFontsize = parseFloat(config.title_fontsize);
-    if (!isNaN(titleFontsize)) {
-      doc.setFontSize(titleFontsize);
-    } else {
-      doc.setFontSize(defaultTitleFontsize);
-    }
+      // 設定されたタイトルを出力
+      const title = config.title || '';
+      // デフォルトのタイトルフォントサイズ
+      const defaultTitleFontsize = 16;
+      // 数値でなければデフォルトタイトルフォントサイズで印字
+      const titleFontsize = parseFloat(config.title_fontsize);
+      if (!isNaN(titleFontsize)) {
+        doc.setFontSize(titleFontsize);
+      } else {
+        doc.setFontSize(defaultTitleFontsize);
+      }
 
-    // デフォルトの初期座標
-    const defaultTitleX = 10;
-    const defaultTitleY = 20;
+      // デフォルトの初期座標
+      const defaultTitleX = 10;
+      const defaultTitleY = 20;
 
 
-    // 数値でなければデフォルト位置で印字
-    const titleX = parseFloat(config.title_x);
-    const titleY = parseFloat(config.title_y);
-    if (!isNaN(titleX) && !isNaN(titleY)) {
-      doc.text(title, titleX, titleY);
-    } else {
-      doc.text(title, defaultTitleX, defaultTitleY);
+      // 数値でなければデフォルト位置で印字
+      const titleX = parseFloat(config.title_x);
+      const titleY = parseFloat(config.title_y);
+      if (!isNaN(titleX) && !isNaN(titleY)) {
+        doc.text(title, titleX, titleY);
+      } else {
+        doc.text(title, defaultTitleX, defaultTitleY);
+      }
     }
 
     // 本文タイトルフォントの設定
@@ -326,11 +349,13 @@ const { jsPDF } = window.jspdf;
       doc.setFontSize(defaultBodyFontsize);
     }
 
+    // ===== このページのフィールドを描画 =====
+    const pageFields = fieldsByPage[pageNum] || [];
     // デフォルトの初期座標
     const defaultX = 10;
     let defaultY = 40;
 
-    fieldCodes.forEach((field, i) => {
+    pageFields.forEach((field, i) => {
       const val = record[field.fieldCode]?.value ?? '(未設定)';
       const label = field.label || field.fieldCode;
       const output = field.showLabel ? `${label} ${formatValue(val)}` : `${formatValue(val)}`;
@@ -349,7 +374,7 @@ const { jsPDF } = window.jspdf;
         defaultY += 10;
       }
     });
-
+  }
     return doc;
   }
 
