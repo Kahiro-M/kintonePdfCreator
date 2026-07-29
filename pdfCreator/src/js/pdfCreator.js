@@ -396,26 +396,52 @@ const { jsPDF } = window.jspdf;
   }
 
   // オブジェクトや配列を整形してJSON文字列に変換する関数
+  // オブジェクトや配列を整形してJSON文字列に変換する関数
   function formatValue(value, indent = 0) {
     const space = ' '.repeat(indent);
-    if (Array.isArray(value)) { // 配列の場合
-      if (value.length === 0){
+
+    if (Array.isArray(value)) {
+      if (value.length === 0) {
         return `${space}[]`;
       }
-      // 各要素をインデント付きで出力
-      return value.map((v, i) => `${formatValue(v, indent + 2)}`).join(', ');
-    } else if (typeof value === 'object' && value !== null) { // オブジェクトの場合
+      
+      // 配列の各要素を処理
+      return value.map((item) => {
+        // 各要素に value プロパティがあり、それがオブジェクトの場合
+        if (item && item.value && typeof item.value === 'object') {
+          const flattened = {};
+          
+          // value オブジェクト内の各フィールドから value プロパティを抽出
+          Object.entries(item.value).forEach(([key, fieldObj]) => {
+            if (fieldObj && typeof fieldObj === 'object' && 'value' in fieldObj) {
+              flattened[key] = fieldObj.value;
+            } else {
+              flattened[key] = fieldObj;
+            }
+          });
+          
+          // フラット化したオブジェクトを整形
+          return formatValue(flattened, indent);
+        }
+        
+        // 通常のオブジェクト・値の場合
+        return formatValue(item, indent);
+      }).join('\n\n');
+      
+    } else if (typeof value === 'object' && value !== null) {
       const entries = Object.entries(value);
-      if (entries.length === 0){ // 空のオブジェクトの場合
+      
+      if (entries.length === 0) {
         return `${space}{}`;
       }
-      // 各キーと値をインデント付きで出力
-      return entries.map(([k, v]) => { //  キーと値をインデント付きで出力
+      
+      return entries.map(([k, v]) => {
         const formatted = formatValue(v, indent + 2);
         return `${space}${k}: ${formatted}`;
       }).join('\n');
+      
     } else {
-      return `${value}`; // プリミティブ型（数値・文字列など）はそのまま
+      return `${value}`;
     }
   }
 
