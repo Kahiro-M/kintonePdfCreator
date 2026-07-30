@@ -1,4 +1,5 @@
 const { jsPDF } = window.jspdf;
+const { autoTable } = window.jspdf; 
 
 (function () {
   'use strict';
@@ -167,6 +168,21 @@ const { jsPDF } = window.jspdf;
       compress: true,      // 内部圧縮を有効化
       putOnlyUsedFonts: true, // 使ったフォントだけ埋め込む
     });
+
+  // // ===== カスタムフォント登録（autoTable用） =====
+  // try {
+  //   // フォントファイルをVFSに追加
+  //   const fontPath = '../lib/'+config.body_font+'.js';  // プラグイン内のパス
+  //   const fontResponse = await fetch(fontPath);
+  //   const fontArrayBuffer = await fontResponse.arrayBuffer();
+    
+  //   // jsPDFのVFSに登録
+  //   doc.addFileToVFS(config.body_font+'.ttf', fontArrayBuffer);
+  //   doc.addFont(config.body_font+'.ttf', config.body_font, 'normal');
+  // } catch (err) {
+  //   console.warn('フォント登録失敗、標準フォントにフォールバック:', err);
+  // }
+
 
     let tmpMeta = {};
     // ===== メタデータ設定 =====
@@ -374,14 +390,59 @@ const { jsPDF } = window.jspdf;
       const tblMaxw = Infinity;
       const maxw = field.tbl ? tblMaxw : strMaxw;
       
+      const tableStylesObj = {
+        font: config.body_font,
+        fontSize: bodyFontsize,
+        fontStyle: 'normal',
+        cellPadding: 1,
+        fillColor: [200, 200, 200],    // セルの背景色（RGB）
+        textColor: [0, 0, 0],          // 文字色（RGB）
+        lineColor: [100, 100, 100],    // 枠線の色（RGB）
+      };
+      const headStylesObj = {
+        fontStyle: 'normal',  // ← ヘッダーも 'normal'
+        fillColor: [100, 100, 100],    // ヘッダーの背景色
+        textColor: [255, 255, 255],    // ヘッダーの文字色（白）
+        lineColor: [50, 50, 50],       // ヘッダーの枠線色
+      };
+      const bodyStylesObj = {
+        fillColor: [240, 240, 240],    // 本体の背景色
+        textColor: [0, 0, 0],          // 本体の文字色
+        lineColor: [150, 150, 150],    // 本体の枠線色
+      };
+      const autoTableStylesObj = {
+            head: output.head,
+            body: output.body,
+            columnStyles: config.columnStyles,
+            startX: x,
+            margin: {
+              left: x,      // ← X座標の開始位置をここで指定
+            },
+            startY: y,
+            styles: tableStylesObj,
+            headStyles: headStylesObj,
+            bodyStyles: bodyStylesObj,
+      };
+
       if (!isNaN(x) && !isNaN(y)) {
         const defaultMaxW = doc.internal.pageSize.getWidth()-x;
-        doc.text(output, x, y,{ maxWidth:Math.min(maxw,defaultMaxW) });
+        if(field.tbl){
+          // autoTable でテーブルを描画
+          doc.autoTable(autoTableStylesObj);
+        }else{
+          doc.text(output, x, y,{ maxWidth:Math.min(maxw,defaultMaxW) });
+        }
       } else {
         const defaultMaxW = doc.internal.pageSize.getWidth()-defaultX;
-        doc.text(output, defaultX, defaultY,{ maxWidth:Math.min(maxw,defaultMaxW) });
+        if(field.tbl){
+          // autoTable でテーブルを描画
+          doc.autoTable(autoTableStylesObj);
+        }else{
+          doc.text(output, defaultX, defaultY,{ maxWidth:Math.min(maxw,defaultMaxW) });
+        }
         defaultY += 10;
       }
+
     });
   }
     return doc;
@@ -453,10 +514,10 @@ const { jsPDF } = window.jspdf;
     }
   }
 
-  // テーブルフィールドのデータをMarkdown形式のテーブルに変換する関数
-  function formatAsTable(data,maxLength) {
+  // テーブルフィールドのデータをautoTableで受け取るためのデータに変換する関数
+  function formatAsTable(data, columnWidths = {}) {
     if (!Array.isArray(data) || data.length === 0) {
-      return '（データなし）';
+      return { head: [], body: [], columnStyles: {} };
     }
 
     // 配列の各要素から value オブジェクトを抽出し、フラット化
@@ -477,53 +538,11 @@ const { jsPDF } = window.jspdf;
     }).filter(row => row !== null);
 
     if (rows.length === 0) {
-      return '（有効なデータなし）';
+      return { head: [], body: [], columnStyles: {} };
     }
 
     // テーブルのヘッダーを取得（最初の行のキー）
     const headers = Object.keys(rows[0]);
-
-    // ヘッダーと各行の最大文字数を計算
-    function calculateColumnWidths(data, minWidth = 3) {
-      if (!Array.isArray(data) || data.length === 0) {
-        return {};
-      }
-
-      console.log('calculateColumnWidths(data,maxLength) data:',data);
-      console.log('calculateColumnWidths(data,maxLength) maxLength:',maxLength);
-
-      // 最初の行のキーを取得（ヘッダー）
-      const firstItem = data[0];
-      if (!firstItem.value || typeof firstItem.value !== 'object') {
-        return {};
-      }
-
-      const headers = Object.keys(firstItem.value);
-      const columnWidths = {};
-
-      // 各カラムについて、ヘッダーとすべての行の最大文字数を計算
-      headers.forEach((header) => {
-        let maxLength = header.length; // ヘッダーの文字数
-
-        console.log('calculateColumnWidths():',maxLength);
-
-        // すべてのデータ行を走査
-        data.forEach((item) => {
-          if (item.value && item.value[header]) {
-            const fieldObj = item.value[header];
-            const value = fieldObj.value ?? fieldObj;
-            const strLength = String(value).length;
-            maxLength = Math.max(maxLength, strLength);
-          }
-        });
-
-        columnWidths[header] = Math.max(maxLength, minWidth);
-      });
-
-      return columnWidths;
-    }
-
-    const autoColumnWidths = calculateColumnWidths(data,maxLength);
 
     // セルの値を指定文字数に制限し、パディングで固定長にする関数
     function padCell(value, maxLength) {
@@ -538,26 +557,27 @@ const { jsPDF } = window.jspdf;
       return str;
     }
 
-    // Markdown テーブルのヘッダー行を生成
-    const headerRow = '| ' + headers.map(h => 
-      padCell(h, autoColumnWidths[h])
-    ).join(' | ') + ' |';
-    
-    const separatorRow = '| ' + headers.map(h => {
-      const width = autoColumnWidths[h] || 3;
-      return '-'.repeat(Math.max(width, 3));
-    }).join(' | ') + ' |';
+    // ヘッダー行を生成
+    const head = [headers.map(h => padCell(h, columnWidths[h]))];
 
     // データ行を生成
-    const dataRows = rows.map((row) => {
-      const values = headers.map((header) => 
-        padCell(row[header] ?? '', autoColumnWidths[header])
+    const body = rows.map((row) => {
+      return headers.map((header) =>
+        padCell(row[header] ?? '', columnWidths[header])
       );
-      return '| ' + values.join(' | ') + ' |';
     });
 
-    // テーブル全体を結合
-    return [headerRow, separatorRow, ...dataRows].join('\n');
+    // columnStyles を生成
+    const columnStyles = {};
+    headers.forEach((header, index) => {
+      const width = columnWidths[header] || 20;
+      columnStyles[index] = {
+        cellWidth: width,
+        halign: 'left'
+      };
+    });
+
+    return { head, body, columnStyles };
   }
 
   // プレビュー表示スペース取得or作成する関数

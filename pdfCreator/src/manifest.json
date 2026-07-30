@@ -1,6 +1,6 @@
 {
   "manifest_version": 1,
-  "version": "1.6.3",
+  "version": "1.7.0",
   "type": "APP",
   "desktop": {
     "js": [
@@ -8,6 +8,7 @@
       "lib/kuc.min.js",
       "lib/jspdf.umd.min.js",
       "lib/pdf-lib.min.js",
+      "lib/jspdf.plugin.autotable.min.js",
       "lib/NotoSansJPGothic-normal.js",
       "lib/NotoSerifJPMincho-normal.js",
       "lib/ipaexg-normal.js",
