@@ -328,6 +328,28 @@ jQuery.noConflict();
       return;
     }
 
+    // ページ番号 ＞ Y座標 ＞ X座標 の順でソート ---
+    values.sort((a, b) => {
+      // 1. ページ番号の比較（数値として比較するため Number に変換）
+      const pnumA = Number(a.pnum) || 0;
+      const pnumB = Number(b.pnum) || 0;
+      if (pnumA !== pnumB) {
+        return pnumA - pnumB;
+      }
+
+      // 2. Y座標の比較
+      const yA = Number(a.y) || 0;
+      const yB = Number(b.y) || 0;
+      if (yA !== yB) {
+        return yA - yB;
+      }
+
+      // 3. X座標の比較
+      const xA = Number(a.x) || 0;
+      const xB = Number(b.x) || 0;
+      return xA - xB;
+    });
+
     // PDFタイトルの取得
     const pdf_title = document.getElementById('pdf-title').value.trim();
     const pdf_title_fontsize = document.getElementById('pdf-title-fontsize').value.trim();
