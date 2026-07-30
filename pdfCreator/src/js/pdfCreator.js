@@ -360,17 +360,19 @@ const { jsPDF } = window.jspdf;
       const label = field.label || field.fieldCode;
       if (field.tbl) {
         // 表形式で出力する場合は、Markdown形式のテーブルに変換して出力
-        var outputTable = formatAsTable(val);
+        var outputTable = formatAsTable(val,Number(field.maxw));
       }else{
         var outputStr = field.showLabel ? `${label} ${formatValue(val)}` : `${formatValue(val)}`;
       }
 
       const output = field.tbl ? outputTable : outputStr;
-      
+
       // 数値でなければデフォルト位置で印字
       const x = parseFloat(field.x);
       const y = parseFloat(field.y);
-      const maxw = Number.isNaN(parseFloat(field.maxw)) ? Infinity : parseFloat(field.maxw);
+      const strMaxw = Number.isNaN(parseFloat(field.maxw)) ? Infinity : parseFloat(field.maxw);
+      const tblMaxw = Infinity;
+      const maxw = field.tbl ? tblMaxw : strMaxw;
       
       if (!isNaN(x) && !isNaN(y)) {
         const defaultMaxW = doc.internal.pageSize.getWidth()-x;
@@ -451,8 +453,8 @@ const { jsPDF } = window.jspdf;
     }
   }
 
-    // テーブルフィールドのデータをMarkdown形式のテーブルに変換する関数
-  function formatAsTable(data) {
+  // テーブルフィールドのデータをMarkdown形式のテーブルに変換する関数
+  function formatAsTable(data,maxLength) {
     if (!Array.isArray(data) || data.length === 0) {
       return '（データなし）';
     }
@@ -481,13 +483,76 @@ const { jsPDF } = window.jspdf;
     // テーブルのヘッダーを取得（最初の行のキー）
     const headers = Object.keys(rows[0]);
 
+    // ヘッダーと各行の最大文字数を計算
+    function calculateColumnWidths(data, minWidth = 3) {
+      if (!Array.isArray(data) || data.length === 0) {
+        return {};
+      }
+
+      console.log('calculateColumnWidths(data,maxLength) data:',data);
+      console.log('calculateColumnWidths(data,maxLength) maxLength:',maxLength);
+
+      // 最初の行のキーを取得（ヘッダー）
+      const firstItem = data[0];
+      if (!firstItem.value || typeof firstItem.value !== 'object') {
+        return {};
+      }
+
+      const headers = Object.keys(firstItem.value);
+      const columnWidths = {};
+
+      // 各カラムについて、ヘッダーとすべての行の最大文字数を計算
+      headers.forEach((header) => {
+        let maxLength = header.length; // ヘッダーの文字数
+
+        console.log('calculateColumnWidths():',maxLength);
+
+        // すべてのデータ行を走査
+        data.forEach((item) => {
+          if (item.value && item.value[header]) {
+            const fieldObj = item.value[header];
+            const value = fieldObj.value ?? fieldObj;
+            const strLength = String(value).length;
+            maxLength = Math.max(maxLength, strLength);
+          }
+        });
+
+        columnWidths[header] = Math.max(maxLength, minWidth);
+      });
+
+      return columnWidths;
+    }
+
+    const autoColumnWidths = calculateColumnWidths(data,maxLength);
+
+    // セルの値を指定文字数に制限し、パディングで固定長にする関数
+    function padCell(value, maxLength) {
+      const str = String(value ?? '');
+      if (maxLength) {
+        if (str.length > maxLength) {
+          return str.substring(0, maxLength - 3) + '...';
+        }
+        // 不足分をスペースで埋めて固定長にする
+        return str.padEnd(maxLength, ' ');
+      }
+      return str;
+    }
+
     // Markdown テーブルのヘッダー行を生成
-    const headerRow = '| ' + headers.join(' | ') + ' |';
-    const separatorRow = '| ' + headers.map(() => '---').join(' | ') + ' |';
+    const headerRow = '| ' + headers.map(h => 
+      padCell(h, autoColumnWidths[h])
+    ).join(' | ') + ' |';
+    
+    const separatorRow = '| ' + headers.map(h => {
+      const width = autoColumnWidths[h] || 3;
+      return '-'.repeat(Math.max(width, 3));
+    }).join(' | ') + ' |';
 
     // データ行を生成
     const dataRows = rows.map((row) => {
-      const values = headers.map((header) => row[header] ?? '');
+      const values = headers.map((header) => 
+        padCell(row[header] ?? '', autoColumnWidths[header])
+      );
       return '| ' + values.join(' | ') + ' |';
     });
 
