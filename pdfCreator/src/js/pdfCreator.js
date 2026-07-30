@@ -395,22 +395,23 @@ const { autoTable } = window.jspdf;
         fontSize: bodyFontsize,
         fontStyle: 'normal',
         cellPadding: 1,
-        fillColor: [200, 200, 200],    // セルの背景色（RGB）
-        textColor: [0, 0, 0],          // 文字色（RGB）
+        fillColor: [240, 240, 240],    // セルの背景色（RGB）
+        textColor: [  0,   0,   0],    // 文字色（RGB）
         lineColor: [100, 100, 100],    // 枠線の色（RGB）
       };
       const headStylesObj = {
         fontStyle: 'normal',  // ← ヘッダーも 'normal'
-        fillColor: [100, 100, 100],    // ヘッダーの背景色
-        textColor: [255, 255, 255],    // ヘッダーの文字色（白）
-        lineColor: [50, 50, 50],       // ヘッダーの枠線色
+        fillColor: [200, 200, 200],    // ヘッダーの背景色
+        textColor: [  0,   0,   0],    // ヘッダーの文字色
+        lineColor: [ 50,  50,  50],    // ヘッダーの枠線色
       };
       const bodyStylesObj = {
         fillColor: [240, 240, 240],    // 本体の背景色
-        textColor: [0, 0, 0],          // 本体の文字色
+        textColor: [  0,   0,   0],    // 本体の文字色
         lineColor: [150, 150, 150],    // 本体の枠線色
       };
       const autoTableStylesObj = {
+            theme: 'grid',
             head: output.head,
             body: output.body,
             columnStyles: config.columnStyles,
