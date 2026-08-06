@@ -31,12 +31,16 @@
 }
 
 .field-cell.shw-chbx{
-  width: 200px;
+  width: 135px;
 }
 .field-cell.tbl-chbx {
   width: 100px;
 }
+.field-cell.bdr-chbx {
+  width: 100px;
+}
 
+.field-cell.bdr-chbx .kuc-checkbox-1-21-0__group,
 .field-cell.shw-chbx .kuc-checkbox-1-21-0__group,
 .field-cell.tbl-chbx .kuc-checkbox-1-21-0__group {
     width: auto;

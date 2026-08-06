@@ -84,22 +84,28 @@ jQuery.noConflict();
 
     // フィールドコードの選択肢生成
     if (savedFields.length > 0) {
-      savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label, obj.showLabel, obj.x, obj.y, obj.maxw, obj.pnum, obj.tbl));
+      savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label, obj.showBorder, obj.showLabel, obj.x, obj.y, obj.maxw, obj.pnum, obj.tbl));
     } else {
       addFieldRow('', '', false, '', '', '', '1', false);
     }
   });
 
   // PDF追加項目の行を追加する関数
-  function addFieldRow(selectedValue, labelValue, showLabel, x, y, maxw, pnum, tbl) {
+  function addFieldRow(selectedValue, labelValue, showBorder, showLabel, x, y, maxw, pnum, tbl) {
     // 行の要素を生成
     const row = document.createElement('div');
     row.className = 'field-row kintoneplugin-row';
     row.style.alignItems = 'center';
 
     // チェックボックス、ラベル入力、ドロップダウン、削除ボタンを生成
+    const bdrCheckbox = new Kuc.Checkbox({
+      items: [{ label: '罫線表示', value: 'bdr' }],
+      value: showBorder ? ['bdr'] : [],
+      className: 'field-show-border'
+    });
+
     const checkbox = new Kuc.Checkbox({
-      items: [{ label: 'ラベル名を表示する', value: 'show' }],
+      items: [{ label: 'ラベル表示', value: 'show' }],
       value: showLabel ? ['show'] : [],
       className: 'field-show-label'
     });
@@ -153,6 +159,10 @@ jQuery.noConflict();
     removeBtn.className = 'remove-field';
 
     // 行に要素を追加
+    const bdrCheckboxCell = document.createElement('div');
+    bdrCheckboxCell.className = 'field-cell bdr-chbx';
+    bdrCheckboxCell.appendChild(bdrCheckbox);
+
     const checkboxCell = document.createElement('div');
     checkboxCell.className = 'field-cell shw-chbx';
     checkboxCell.appendChild(checkbox);
@@ -189,6 +199,7 @@ jQuery.noConflict();
     removeCell.className = 'field-cell dl-btn';
     removeCell.appendChild(removeBtn);
 
+    row.appendChild(bdrCheckboxCell);
     row.appendChild(checkboxCell);
     row.appendChild(labelCell);
     row.appendChild(selectCell);
@@ -202,6 +213,7 @@ jQuery.noConflict();
     // プロパティとして保持しておく
     row._fldcd = dropdown;
     row._lbtxt = labelInput;
+    row._bdrchbx = bdrCheckbox;
     row._shwchbx = checkbox;
     row._x = xInput;
     row._y = yInput;
@@ -314,6 +326,7 @@ jQuery.noConflict();
       return {
         fieldCode: row._fldcd.value,
         label: row._lbtxt.value.trim(),
+        showBorder: row._bdrchbx.value.includes('bdr'),
         showLabel: row._shwchbx.value.includes('show'),
         maxw: row._maxw.value.trim(),
         pnum: row._pnum.value.trim(),
