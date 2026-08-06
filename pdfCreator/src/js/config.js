@@ -73,6 +73,8 @@ jQuery.noConflict();
   let fieldOptions = [];
   const client = new window.KintoneRestAPIClient();
   const appId = kintone.app.getId();
+  // 初期化用のフィールド行データ
+  const initAddFieldRow=['', '', false, false, false, '', '', '', '1', false];
 
   client.app.getFormFields({ app: appId }).then((resp) => {
     for (const [code, prop] of Object.entries(resp.properties)) {
@@ -86,7 +88,7 @@ jQuery.noConflict();
     if (savedFields.length > 0) {
       savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label, obj.showXBorder, obj.showYBorder, obj.showLabel, obj.x, obj.y, obj.maxw, obj.pnum, obj.tbl));
     } else {
-      addFieldRow('', '', false, false, false, '', '1', false);
+      addFieldRow(...initAddFieldRow);
     }
   });
 
@@ -319,7 +321,7 @@ jQuery.noConflict();
   });
 
   // 追加ボタンのイベントリスナー
-  addButton.onclick = () => addFieldRow('', '', false, '', '', '', '1');
+  addButton.onclick = () => addFieldRow(...initAddFieldRow);
 
   // 背景画像削除ボタンのイベントリスナー
   pdfImgClearButton.addEventListener('click', (e) => {
