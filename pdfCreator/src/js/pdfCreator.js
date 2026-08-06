@@ -169,20 +169,6 @@ const { autoTable } = window.jspdf;
       putOnlyUsedFonts: true, // 使ったフォントだけ埋め込む
     });
 
-  // // ===== カスタムフォント登録（autoTable用） =====
-  // try {
-  //   // フォントファイルをVFSに追加
-  //   const fontPath = '../lib/'+config.body_font+'.js';  // プラグイン内のパス
-  //   const fontResponse = await fetch(fontPath);
-  //   const fontArrayBuffer = await fontResponse.arrayBuffer();
-    
-  //   // jsPDFのVFSに登録
-  //   doc.addFileToVFS(config.body_font+'.ttf', fontArrayBuffer);
-  //   doc.addFont(config.body_font+'.ttf', config.body_font, 'normal');
-  // } catch (err) {
-  //   console.warn('フォント登録失敗、標準フォントにフォールバック:', err);
-  // }
-
 
     let tmpMeta = {};
     // ===== メタデータ設定 =====
@@ -442,6 +428,31 @@ const { autoTable } = window.jspdf;
           doc.text(output, defaultX, defaultY,{ maxWidth:Math.min(maxw,defaultMaxW) });
         }
         defaultY += 10;
+      }
+
+      // 罫線描画処理
+      if (field.showXBorder || field.showYBorder) {
+        // 描画位置を決定（既存のテキスト描画と同じロジック）
+        const borderX = !isNaN(x) ? x : defaultX;
+        const borderY = !isNaN(y) ? y : defaultY;
+
+        // 罫線の長さ（maxw が無効値の場合は描画しない）
+        const maxwValue = parseFloat(field.maxw);
+
+        if (!isNaN(maxwValue) && maxwValue > 0) {
+          // 線色・線幅（必要に応じて config や field から取得するよう拡張可）
+          doc.setDrawColor(0, 0, 0);     // 黒
+          doc.setLineWidth(0.2);         // 0.2mm
+
+          // 横線（xbdr=TRUE）：(x, y) → (x + maxw, y)
+          if (field.showXBorder) {
+            doc.line(borderX, borderY, borderX + maxwValue, borderY);
+          }
+          // 縦線（ybdr=TRUE）：(x, y) → (x, y + maxw)
+          if (field.showYBorder) {
+            doc.line(borderX, borderY, borderX, borderY + maxwValue);
+          }
+        }
       }
 
     });
