@@ -84,24 +84,30 @@ jQuery.noConflict();
 
     // フィールドコードの選択肢生成
     if (savedFields.length > 0) {
-      savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label, obj.showBorder, obj.showLabel, obj.x, obj.y, obj.maxw, obj.pnum, obj.tbl));
+      savedFields.forEach((obj) => addFieldRow(obj.fieldCode, obj.label, obj.showXBorder, obj.showYBorder, obj.showLabel, obj.x, obj.y, obj.maxw, obj.pnum, obj.tbl));
     } else {
-      addFieldRow('', '', false, '', '', '', '1', false);
+      addFieldRow('', '', false, false, false, '', '1', false);
     }
   });
 
   // PDF追加項目の行を追加する関数
-  function addFieldRow(selectedValue, labelValue, showBorder, showLabel, x, y, maxw, pnum, tbl) {
+  function addFieldRow(selectedValue, labelValue, showXBorder, showYBorder, showLabel, x, y, maxw, pnum, tbl) {
     // 行の要素を生成
     const row = document.createElement('div');
     row.className = 'field-row kintoneplugin-row';
     row.style.alignItems = 'center';
 
     // チェックボックス、ラベル入力、ドロップダウン、削除ボタンを生成
-    const bdrCheckbox = new Kuc.Checkbox({
-      items: [{ label: '罫線表示', value: 'bdr' }],
-      value: showBorder ? ['bdr'] : [],
-      className: 'field-show-border'
+    const xBdrCheckbox = new Kuc.Checkbox({
+      items: [{ label: '横', value: 'xbdr' }],
+      value: showXBorder ? ['xbdr'] : [],
+      className: 'field-show-x-border'
+    });
+
+    const yBdrCheckbox = new Kuc.Checkbox({
+      items: [{ label: '縦', value: 'ybdr' }],
+      value: showYBorder ? ['ybdr'] : [],
+      className: 'field-show-y-border'
     });
 
     const checkbox = new Kuc.Checkbox({
@@ -159,9 +165,13 @@ jQuery.noConflict();
     removeBtn.className = 'remove-field';
 
     // 行に要素を追加
-    const bdrCheckboxCell = document.createElement('div');
-    bdrCheckboxCell.className = 'field-cell bdr-chbx';
-    bdrCheckboxCell.appendChild(bdrCheckbox);
+    const xBdrCheckboxCell = document.createElement('div');
+    xBdrCheckboxCell.className = 'field-cell xbdr-chbx';
+    xBdrCheckboxCell.appendChild(xBdrCheckbox);
+
+    const yBdrCheckboxCell = document.createElement('div');
+    yBdrCheckboxCell.className = 'field-cell ybdr-chbx';
+    yBdrCheckboxCell.appendChild(yBdrCheckbox);
 
     const checkboxCell = document.createElement('div');
     checkboxCell.className = 'field-cell shw-chbx';
@@ -199,7 +209,8 @@ jQuery.noConflict();
     removeCell.className = 'field-cell dl-btn';
     removeCell.appendChild(removeBtn);
 
-    row.appendChild(bdrCheckboxCell);
+    row.appendChild(xBdrCheckboxCell);
+    row.appendChild(yBdrCheckboxCell);
     row.appendChild(checkboxCell);
     row.appendChild(labelCell);
     row.appendChild(selectCell);
@@ -213,7 +224,8 @@ jQuery.noConflict();
     // プロパティとして保持しておく
     row._fldcd = dropdown;
     row._lbtxt = labelInput;
-    row._bdrchbx = bdrCheckbox;
+    row._xbdrchbx = xBdrCheckbox;
+    row._ybdrchbx = yBdrCheckbox;
     row._shwchbx = checkbox;
     row._x = xInput;
     row._y = yInput;
@@ -326,7 +338,8 @@ jQuery.noConflict();
       return {
         fieldCode: row._fldcd.value,
         label: row._lbtxt.value.trim(),
-        showBorder: row._bdrchbx.value.includes('bdr'),
+        showXBorder: row._xbdrchbx.value.includes('xbdr'),
+        showYBorder: row._ybdrchbx.value.includes('ybdr'),
         showLabel: row._shwchbx.value.includes('show'),
         maxw: row._maxw.value.trim(),
         pnum: row._pnum.value.trim(),
